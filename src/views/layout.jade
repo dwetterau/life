@@ -1,0 +1,22 @@
+doctype html
+html
+  head
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    link(rel='stylesheet', href='/stylesheets/bootstrap.min.css')
+    script(src='http://code.jquery.com/jquery-2.1.1.min.js')
+    script(src='/javascripts/external/bootstrap.min.js')
+    script(src='/javascripts/bundle.js' defer)
+    title #{title} | node-base-app
+
+    meta(property="og:title" content=title)
+
+  body
+    include partials/navbar
+
+    .container
+      include partials/flash
+      block content
+
+    include partials/footer
+
+    include partials/analytics

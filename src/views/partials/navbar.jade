@@ -1,0 +1,28 @@
+.navbar.navbar-default.navbar-fixed-top
+  .container
+    .navbar-header
+      a.navbar-brand(href='/')
+        span
+        | base-node-app
+    .collapse.navbar-collapse
+      ul.nav.navbar-nav
+        li(class=title=='Home'?'active':undefined)
+          a(href='/') Home
+      ul.nav.navbar-nav.navbar-right
+        if !user
+          li(class=title=='Login'?'active':undefined)
+            a(href='/user/login') Login
+          li(class=title=='Create Account'?'active':undefined)
+            a(href='/user/create') Create Account
+        else
+          li.dropdown(class=title=='Account Management'?'active':undefined)
+            a.dropdown-toggle(href='#', data-toggle='dropdown')
+              | #{user.username}&nbsp;
+              i.caret
+            ul.dropdown-menu
+              li
+                a(href='/user/password')
+                  span Change Password
+              li
+                a(href='/user/logout')
+                  span Logout

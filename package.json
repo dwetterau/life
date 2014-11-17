@@ -1,0 +1,67 @@
+{
+  "name": "base-node-app",
+  "preferGlobal": false,
+  "private": true,
+  "version": "0.0.0",
+  "description": "A base node application using Bootstrap and Sequelize written in Coffeescript",
+  "main": "index.js",
+  "author": "David Wetterau <david.wetterau@gmail.com>",
+  "scripts": {
+    "start": "chmod +x ./scripts/start.sh && ./scripts/start.sh",
+    "test": "chmod +x ./scripts/test.sh && ./scripts/test.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/dwetterau/base-node-app.git"
+  },
+  "keywords": [
+    "Coffeescript",
+    "Node.js"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dwetterau/base-node-app/issues"
+  },
+  "dependencies": {
+    "bcrypt": "^0.8.0",
+    "body-parser": "~1.8.1",
+    "browserify": "^5.10.1",
+    "coffee-script": "~1.7.1",
+    "coffeeify": "^0.7.0",
+    "coffeelint": "*",
+    "connect-busboy": "0.0.2",
+    "connect-mysql": "^2.1.1",
+    "connect-redis": "^2.1.0",
+    "cookie-parser": "~1.3.3",
+    "debug": "~2.0.0",
+    "express": "~4.9.0",
+    "express-flash": "0.0.2",
+    "express-session": "^1.9.1",
+    "express-validator": "^2.6.0",
+    "fs-extra": "^0.12.0",
+    "imagemagick": "^0.1.3",
+    "jade": "^1.7.0",
+    "jquery": "^2.1.1",
+    "method-override": "^2.3.0",
+    "morgan": "~1.3.0",
+    "mysql": "^2.5.2",
+    "nconf": "~0.6.9",
+    "node-mysql": "^0.4.0",
+    "node-uuid": "^1.4.1",
+    "passport": "^0.2.1",
+    "passport-local": "^1.0.0",
+    "q": "^1.0.1",
+    "redis": "^0.12.1",
+    "sequelize": "^2.0.0-rc1",
+    "sequelize-cli": "^0.3.3",
+    "serve-favicon": "~2.1.3"
+  },
+  "devDependencies": {
+    "chai": "*",
+    "mocha": "*"
+  },
+  "homepage": "https://github.com/dwetterau/base-node-app",
+  "engines": {
+    "node": "~0.10.30"
+  }
+}
