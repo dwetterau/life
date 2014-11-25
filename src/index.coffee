@@ -69,6 +69,8 @@ if app.get('env') == 'local'
     errorObj =
       message: err.message
       error: err
+      title: 'Error'
+      user: req.user
     res.render('error', errorObj)
 else
   # production error handler
@@ -78,6 +80,8 @@ else
     errorObj =
       message: err.message
       error: {}
+      title: 'Error'
+      user: req.user
     res.render('error', errorObj)
 
 app.listen(config.get('PORT'))
