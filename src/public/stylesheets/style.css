@@ -22,3 +22,15 @@ footer {
     height: 45px;
     line-height: 45px;
 }
+
+div.alert-container {
+    width: 100%;
+    position: absolute;
+    z-index: 1;
+}
+
+div.alert {
+    margin-left: 25%;
+    width: 50%;
+    position: relative;
+}

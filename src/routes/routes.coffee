@@ -2,8 +2,8 @@ express = require 'express'
 router = express.Router()
 passport_config  = require('../lib/auth')
 
-index_controller = require '../lib/controllers/index_controller'
-user_controller = require '../lib/controllers/user_controller'
+index_controller = require '../controllers/index_controller'
+user_controller = require '../controllers/user_controller'
 
 # GET home page
 router.get '/', index_controller.get_index

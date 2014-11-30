@@ -3,7 +3,7 @@ passport = require 'passport'
 models = require '../models'
 
 exports.get_user_create = (req, res) ->
-  res.render 'create_account',
+  res.render 'user/create_account',
     title: 'Create Account'
 
 exports.post_user_create = (req, res) ->
@@ -21,7 +21,8 @@ exports.post_user_create = (req, res) ->
   new_user = models.User.build({username})
   new_user.hash_and_set_password password, (err) ->
     if err?
-      res.render 'error', err
+      req.flash 'errors', {msg: "Unable to create account at this time"}
+      return res.redirect '/user/create'
     else
       new_user.save().success () ->
         req.logIn new_user, (err) ->
@@ -35,7 +36,7 @@ exports.post_user_create = (req, res) ->
 
 exports.get_user_login = (req, res) ->
   redirect = req.param('r')
-  res.render 'login', {
+  res.render 'user/login', {
     title: 'Login'
     redirect
   }
@@ -103,7 +104,7 @@ exports.post_change_password = (req, res) ->
   .failure fail
 
 exports.get_change_password = (req, res) ->
-  res.render 'change_password', {
+  res.render 'user/change_password', {
     user: req.user,
     title: 'Change Password'
   }

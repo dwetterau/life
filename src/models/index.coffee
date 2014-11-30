@@ -2,7 +2,7 @@ fs = require "fs"
 path = require "path"
 Sequelize = require "sequelize"
 env = process.env.NODE_ENV || "local"
-{config} = require('../common')
+{config} = require('../lib/common')
 
 sequelize = new Sequelize(
   config.get('database'),

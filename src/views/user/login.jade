@@ -1,25 +1,22 @@
-extends layout
+extends ../layout
 
 block content
 
   .page-header
-    h3 Create an account
-  form.form-horizontal(action="/user/create" id='signup-form', method='POST')
+    h3 Sign in
+  form.form-horizontal(action="/user/login", method='POST')
     input(type='hidden', name='_csrf', value=_csrf)
+    input(type='hidden', name='redirect', value=redirect)
     .form-group
       label.col-sm-3.control-label(for='username') Username
       .col-sm-7
-        input.form-control(type='text', name='username', id='username', placeholder='Username', autofocus)
+        input.form-control(type='text', name='username', id='username', placeholder='Username')
     .form-group
       label.col-sm-3.control-label(for='password') Password
       .col-sm-7
         input.form-control(type='password', name='password', id='password', placeholder='Password')
     .form-group
-      label.col-sm-3.control-label(for='confirm_password') Confirm Password
-      .col-sm-7
-        input.form-control(type='password', name='confirm_password', id='confirm_password', placeholder='Confirm Password')
-    .form-group
       .col-sm-offset-3.col-sm-7
         button.btn.btn-success(type='submit')
           span.ion-person-add
-          | Create account
+          | Login

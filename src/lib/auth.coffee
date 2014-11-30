@@ -1,7 +1,7 @@
 passport = require 'passport'
 LocalStrategy = require 'passport-local'
 
-models = require './models'
+models = require '../models'
 
 passport.serializeUser (user, done) ->
   done null, user.id
