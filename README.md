@@ -1,13 +1,14 @@
 base-node-app
 =============
 
-A simple website starting point using the Sequelize ORM for MySQL written in Coffeescript and using Bootstrap for styling.
+A simple website starting point using the Sequelize ORM for MySQL written in Coffeescript and using a Material Design
+inspired Bootstrap theme for styling.
 
 ### Description
 
-This site has a simple Bootstrap themed UI to allow users to log in, an update their profile. The point of this
-project is to provide a launching pad for an application without the need to rewrite user management code over and
-over again.
+This site has a simple Material Design inspired Bootstrap themed UI to allow users to log in, an update their profile.
+The point of this project is to provide a launching pad for an application without the need to rewrite user management
+code over and over again.
 
 ### Installation Instructions
 
