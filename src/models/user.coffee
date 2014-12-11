@@ -3,16 +3,10 @@ bcrypt = require 'bcrypt'
 module.exports = (sequelize, DataTypes) ->
   User = sequelize.define "User",
     username: {
-      type: DataTypes
+      type: DataTypes.STRING
       unique: true
     }
-    password: DataTypes.STRING,
-    is_mod: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false
-    }
-  , classMethods:
-    associate: (models) ->
+    password: DataTypes.STRING
   , instanceMethods:
 
     hash_and_set_password: (unhashed_password, next) ->

@@ -1,10 +1,10 @@
-.navbar.navbar-default.navbar-fixed-top
+.navbar.navbar-default.navbar-fixed-top.navbar-material-indigo
   .container
     .navbar-header
       a.navbar-brand(href='/')
         span
         | base-node-app
-    .collapse.navbar-collapse
+    .collapse.navbar-collapse.navbar-collapse-materia
       ul.nav.navbar-nav
         li(class=title=='Home'?'active':undefined)
           a(href='/') Home
@@ -15,7 +15,7 @@
           li(class=title=='Create Account'?'active':undefined)
             a(href='/user/create') Create Account
         else
-          li.dropdown(class=title=='Account Management'?'active':undefined)
+          li.dropdown
             a.dropdown-toggle(href='#', data-toggle='dropdown')
               | #{user.username}&nbsp;
               i.caret

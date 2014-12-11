@@ -1,4 +1,4 @@
-models = require '../lib/models'
+models = require '../models'
 models.sequelize
   .sync()
   .complete (err) ->
