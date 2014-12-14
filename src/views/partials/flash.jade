@@ -1,16 +1,16 @@
 .alert-container
   if messages.errors
-    .alert.alert-danger.alert-dismissable.fade.in
+    .alert.alert-danger.alert-dismissable
       button.close(type='button', data-dismiss='alert') &times;
       for error in messages.errors
         .text-center= error.msg
   if messages.info
-    .alert.alert-info.alert-dismissable.fade.in
+    .alert.alert-info.alert-dismissable
       button.close(type='button', data-dismiss='alert') &times;
       for info in messages.info
         .text-center= info.msg
   if messages.success
-    .alert.alert-success.alert-dismissable.fade.in
+    .alert.alert-success.alert-dismissable
       button.close(type='button', data-dismiss='alert') &times;
       for success in messages.success
         .text-center= success.msg
