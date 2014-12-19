@@ -1,9 +1,9 @@
 {
-  "name": "base-node-app",
+  "name": "life",
   "preferGlobal": false,
   "private": true,
   "version": "0.0.0",
-  "description": "A base node application using Bootstrap and Sequelize written in Coffeescript",
+  "description": "Privately record your life.",
   "main": "index.js",
   "author": "David Wetterau <david.wetterau@gmail.com>",
   "scripts": {
@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/dwetterau/base-node-app.git"
+    "url": "git://github.com/dwetterau/life.git"
   },
   "keywords": [
     "Coffeescript",
@@ -20,7 +20,7 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/dwetterau/base-node-app/issues"
+    "url": "https://github.com/dwetterau/life/issues"
   },
   "dependencies": {
     "bcrypt": "^0.8.0",
@@ -60,7 +60,7 @@
     "chai": "*",
     "mocha": "*"
   },
-  "homepage": "https://github.com/dwetterau/base-node-app",
+  "homepage": "https://github.com/dwetterau/life",
   "engines": {
     "node": "~0.10.30"
   }
