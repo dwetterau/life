@@ -1,7 +1,7 @@
 extends layout
 
 block content
-
-  .page-header
-    h1 Welcome to the home page!
-  .well Now your websites can look all material and stuff.
+  if !user
+    include index/logged_out
+  else
+    include index/life_view

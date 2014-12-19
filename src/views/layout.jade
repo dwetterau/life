@@ -2,8 +2,10 @@ doctype html
 html
   head
     link(rel='stylesheet', href='/stylesheets/external/bootstrap.min.css')
+    link(rel='stylesheet', href='/stylesheets/external/bootstrap-datetimepicker.min.css')
     link(rel='stylesheet', href='/stylesheets/external/ripples.min.css')
     link(rel='stylesheet', href='/stylesheets/external/material-wfont.min.css')
+    link(rel='stylesheet', href='/stylesheets/external/quill.snow.css')
     link(rel='stylesheet', href='/stylesheets/style.css')
     title #{title} | Life
 
@@ -22,7 +24,10 @@ html
     include partials/analytics
 
     script(src='//code.jquery.com/jquery-2.1.1.min.js')
+    script(src='//cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js')
+    script(src='/javascripts/external/quill.min.js')
     script(src='/javascripts/external/bootstrap.min.js')
+    script(src='/javascripts/external/bootstrap-datetimepicker.min.js')
     script(src='/javascripts/external/material.min.js' )
     script(src='/javascripts/external/ripples.min.js' )
     script(src='/javascripts/bundle.js' defer)

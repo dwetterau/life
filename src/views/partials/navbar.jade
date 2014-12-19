@@ -12,6 +12,9 @@
       ul.nav.navbar-nav
         li(class=title=='Home'?'active':undefined)
           a(href='/') Home
+        if user
+          li(class=title=='Add Event'?'active':undefined)
+            a(href='/event/add') Add Event
       ul.nav.navbar-nav.navbar-right
         if !user
           li(class=title=='Login'?'active':undefined)
