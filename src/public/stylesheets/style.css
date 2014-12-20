@@ -36,3 +36,8 @@ div.alert {
 div#editor {
     min-height: 500px;
 }
+
+.time {
+    display: inline-block;
+    padding-right: 1em;
+}
