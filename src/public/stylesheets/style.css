@@ -41,3 +41,7 @@ div#editor {
     display: inline-block;
     padding-right: 1em;
 }
+
+.selector {
+    display: inline-block;
+}
