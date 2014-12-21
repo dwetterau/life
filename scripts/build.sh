@@ -16,7 +16,7 @@ cp -r ./src/views ./bin/views
 echo "Compiling Coffeescript to JS..."
 ./node_modules/.bin/coffee --output ./bin/ --compile ./src/
 
-./node_modules/.bin/browserify --transform coffeeify --debug  \
+./node_modules/.bin/browserify --extension .coffee --transform coffeeify --debug  \
 ./src/public/javascripts/index.coffee > ./bin/public/javascripts/bundle.js
 
 echo "Linting..."

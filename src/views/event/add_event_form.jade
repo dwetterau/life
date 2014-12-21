@@ -4,17 +4,7 @@ block content
     h1 Create event
   .well.bs-component
     form.form-horizontal(action="/event/add", id='add_event', method='POST')
-      .form-group.form-group-material-indigo
-        .col-sm-offset-2.col-sm-8
-          .time
-            select.form-control(name="day")
-              option Today
-              option Yesterday
-              option Another day
-          .time
-            select.form-control(name="time")
-              option right now
-              option at another time
+      .form-group.form-group-material-indigo !{time_selector}
       .form-group.form-group-material-indigo
         .col-sm-offset-2.col-sm-8.well(id="detail_editor")
           include editor
