@@ -7,7 +7,7 @@ moment = require 'moment'
 #   - Maintains a list of events
 
 LifeApp = React.createClass
-  displayName: 'Selector'
+  displayName: 'LifeApp'
   getInitialState: (props) ->
     props = props || @props
 
@@ -22,7 +22,6 @@ LifeApp = React.createClass
 
   componentDidMount: () ->
     # TODO: add listeners and stuff here that we might want
-    console.log @state
 
   render: () ->
     objects = @getAllTimelineObjects()
@@ -40,21 +39,16 @@ LifeApp = React.createClass
     sort_function = (a, b) ->
       a.date.unix() - b.date.unix()
     new_events = []
-    while j < events.length
+    while j <= events.length
       event = events[j]
-      if event.rendered_date != current_date
+      if j == events.length or event.rendered_date != current_date
         # Slice, reverse sort
         s = events.slice i, j
         s.sort sort_function
-        new_events = new_events.concat new_events, s
+        new_events = new_events.concat s
         i = j
-        current_date = event.rendered_date
+        current_date = event? and event.rendered_date
       j++
-    # After the loop, if i is still in the array, do it one more time
-    if i < events.length
-      s = events.slice i, j
-      s.sort sort_function
-      new_events = new_events.concat new_events, s
 
     return new_events
 
@@ -87,13 +81,70 @@ LifeApp = React.createClass
     i = 0
     key = 0
     for header in headers
-      objects.push React.createElement "div", {key}, JSON.stringify(header)
+      objects.push React.createElement Header, {key, header}, JSON.stringify(header)
       key++
       while i < events.length and events[i].rendered_date == header.date
-        objects.push React.createElement "div", {key}, JSON.stringify(events[i])
+        event = events[i]
+        objects.push React.createElement EventTile, {key, event}, JSON.stringify(event)
         i++
         key++
 
     return objects
+
+Header = React.createClass
+  displayName: 'Header'
+  render: () ->
+    return React.createElement "div", {className: 'header-tile'}, @props.header.date
+
+EventTile = React.createClass
+  displayName: 'EventTile'
+
+  getInitialState: (props) ->
+    props = props || @props
+
+    initial = {
+      event: props.event
+      event_processed: false
+      show_all_detail: true
+    }
+    initial.to_display = @prepareEvent(props.event, true)
+
+    return initial
+
+  getEventDetail: (event, show_all) ->
+    if show_all
+      return event.detail
+    else
+      element = $('<div>').html(event.detail)
+      return element.children().get(0).innerHTML
+
+  prepareEvent: (event, show_all) ->
+    return {
+      date: event.date.format('h:mm A')
+      detail: @getEventDetail(event, show_all)
+    }
+
+  switchDetail: () ->
+    show_all_detail = not @state.show_all_detail
+    to_display = @prepareEvent(@state.event, show_all_detail)
+
+    # Trigger the render
+    @setState {to_display, show_all_detail}
+
+  componentDidMount: () ->
+    @switchDetail()
+
+  handleClick: (e) ->
+    @switchDetail()
+    e.stopPropagation()
+
+  render: () ->
+    return React.createElement("div", {className: "well", onClick: @handleClick},
+      React.createElement("div", {className: "event-date"}, @state.to_display.date)
+      React.createElement("div", {
+        className: "event-detail",
+        dangerouslySetInnerHTML: {__html: @state.to_display.detail}
+      })
+    )
 
 module.exports = {LifeApp}

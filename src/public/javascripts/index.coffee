@@ -1,17 +1,16 @@
-# Client-side stuff here
-# Initialize the material effects
-$.material.init()
-
 # Import React
 React = require 'react'
 {Selector} = require '../../components/time_selector'
 {LifeApp} = require '../../components/life_app'
 
+# Client-side stuff here
+# Initialize the material effects
+$.material.init()
 
 if $('form#add_event').length
 
   # Initialize the time/date picker
-  React.render(Selector(), document.getElementById("selector_container"))
+  React.render(React.createElement(Selector), $("#selector_container").get(0))
 
   # Initialize the editor
   editor = new Quill '#editor', {
@@ -30,4 +29,5 @@ if $('form#add_event').length
 if $('div#life_app').length
   # Copy in the initial state and render everything
   initial_state = JSON.parse($('script#initial_state').html())
-  React.render(LifeApp({events: initial_state}), document.getElementById("life_app"))
+  React.render(React.createElement(LifeApp, {events: initial_state}),
+    $("#life_app").get(0))
