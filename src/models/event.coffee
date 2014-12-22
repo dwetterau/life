@@ -14,5 +14,10 @@ module.exports = (sequelize, DataTypes) ->
     associate: (models) ->
       Event.belongsTo(models.User)
       Event.hasMany(models.Label)
-
+  , instanceMethods:
+    to_json: () ->
+      return {
+        detail: this.detail
+        date: this.date
+      }
   return Event

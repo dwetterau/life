@@ -40,6 +40,11 @@ DaySelector = React.createClass
       state.date_suffix = @getDaySuffixIndex(@days[i])
     else if id == 'years'
       state.date.set('year', @years[i])
+      # Handle the case from switching from Feb. 29th to not a leap year
+      if i != selections[2]
+        if @days[selections[1]] != state.date.date()
+          state.date_suffix = @getDaySuffixIndex(1)
+
     @setState(state)
 
   getDaySuffixIndex: (day) ->

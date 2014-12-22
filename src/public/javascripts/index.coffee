@@ -4,7 +4,8 @@ $.material.init()
 
 # Import React
 React = require 'react'
-{Selector} = require('../../components/time_selector')
+{Selector} = require '../../components/time_selector'
+{LifeApp} = require '../../components/life_app'
 
 
 if $('form#add_event').length
@@ -25,3 +26,8 @@ if $('form#add_event').length
   $('#toolbar').show()
   $('#editor').click () ->
     $('.ql-editor').get(0).focus()
+
+if $('div#life_app').length
+  # Copy in the initial state and render everything
+  initial_state = JSON.parse($('script#initial_state').html())
+  React.render(LifeApp({events: initial_state}), document.getElementById("life_app"))
