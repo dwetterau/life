@@ -2,10 +2,15 @@
 # Initialize the material effects
 $.material.init()
 
+# Import React
+React = require 'react'
+{Selector} = require('../../components/time_selector')
+
+
 if $('form#add_event').length
 
   # Initialize the time/date picker
-  #$('input#date').datetimepicker()
+  React.render(Selector(), document.getElementById("selector_container"))
 
   # Initialize the editor
   editor = new Quill '#editor', {

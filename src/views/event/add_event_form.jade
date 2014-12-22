@@ -4,7 +4,7 @@ block content
     h1 Create event
   .well.bs-component
     form.form-horizontal(action="/event/add", id='add_event', method='POST')
-      .form-group.form-group-material-indigo !{time_selector}
+      .form-group.form-group-material-indigo(id="selector_container")
       .form-group.form-group-material-indigo
         .col-sm-offset-2.col-sm-8.well(id="detail_editor")
           include editor

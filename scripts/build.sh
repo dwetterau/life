@@ -18,6 +18,7 @@ echo "Compiling Coffeescript to JS..."
 
 ./node_modules/.bin/browserify --extension .coffee --transform coffeeify --debug  \
 ./src/public/javascripts/index.coffee > ./bin/public/javascripts/bundle.js
+#./src/public/javascripts/index.coffee | uglifyjs > ./bin/public/javascripts/bundle.js
 
 echo "Linting..."
 find ./src -name "*.coffee" -print0 | xargs -0 ./node_modules/.bin/coffeelint -f ./coffeelint.json

@@ -39,9 +39,10 @@ div#editor {
 
 .time {
     display: inline-block;
-    padding-right: 1em;
+    padding-right: .75em;
 }
 
 .selector {
     display: inline-block;
+    border-bottom: 0;
 }
