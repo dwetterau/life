@@ -7,6 +7,10 @@ module.exports = (sequelize, DataTypes) ->
       unique: true
     }
     password: DataTypes.STRING
+  , classMethods:
+    associate: (models) ->
+      User.hasMany(models.Event, {as: 'events', foreignKey: 'UserId'})
+      User.hasMany(models.Label)
   , instanceMethods:
 
     hash_and_set_password: (unhashed_password, next) ->

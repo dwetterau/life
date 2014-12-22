@@ -1,6 +1,10 @@
 React = require 'react'
 moment = require 'moment'
 
+update_selection_value = (date) ->
+  $('#date').val(date.utc())
+  date.local()
+
 DaySelector = React.createClass
   displayName: "DaySelector"
   months: ['January', 'February', 'March', 'April', 'May', 'June', 'July',
@@ -37,7 +41,6 @@ DaySelector = React.createClass
     else if id == 'years'
       state.date.set('year', @years[i])
     @setState(state)
-    console.log state.date
 
   getDaySuffixIndex: (day) ->
     if (day <= 3 or (day > 20 and day % 10 <= 3)) and day % 10 > 0
@@ -65,6 +68,7 @@ DaySelector = React.createClass
       "option", {key: i}, day) for day, i in @days when i < days_in_month)
     years = (React.createElement("option", {key: i}, year) for year, i in @years)
 
+    update_selection_value(@state.date)
     return React.createElement("div", className: "time",
       React.createElement("div", {className: 'selector'},
         React.createElement("select", {
@@ -127,7 +131,6 @@ TimeSelector = React.createClass
       else
         state.date.set('hour', hour + 12)
     @setState(state)
-    console.log state.date
 
   getSelectionWithDate: () ->
     # Returns hours, minutes, period
@@ -144,6 +147,7 @@ TimeSelector = React.createClass
     minutes = (React.createElement("option", {key: i}, minute) for minute, i in @minutes)
     periods = (React.createElement("option", {key: i}, period) for period, i in @periods)
 
+    update_selection_value(@state.date)
     return React.createElement("div", className: "time", onChange: @handleChange,
       React.createElement("div", {className: 'selector'},
         React.createElement("select", {
@@ -182,7 +186,7 @@ Selector = React.createClass
   render: () ->
     return React.createElement("div", {className: "col-sm-offset-2 col-sm-8"},
       React.createElement(TimeSelector, {className: "time", date: @state.date})
-      React.createElement("span", {className: "time"}, " on ")
+      React.createElement("span", {className: "time"}, "on")
       React.createElement(DaySelector, {className: "time", date: @state.date})
     )
 

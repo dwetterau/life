@@ -20,6 +20,8 @@ if $('form#add_event').length
       'image-tooltip': true
     theme: 'snow'
   }
+  editor.on 'text-change', () ->
+    $('#detail').val editor.getHTML()
   $('#toolbar').show()
   $('#editor').click () ->
     $('.ql-editor').get(0).focus()

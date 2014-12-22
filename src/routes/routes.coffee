@@ -20,5 +20,6 @@ router.post '/user/password', passport_config.isAuthenticated, user_controller.p
 
 # Event routes
 router.get '/event/add', passport_config.isAuthenticated, event_controller.get_event_add
+router.post '/event/add', passport_config.isAuthenticated, event_controller.post_event_add
 
 module.exports = router
