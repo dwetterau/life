@@ -1,4 +1,4 @@
-utils = require('./utils')
+utils = require('../utils')
 
 module.exports = Object.freeze
   config: require('./config')

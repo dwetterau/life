@@ -1,5 +1,6 @@
 React = require 'react'
 moment = require 'moment'
+utils = require '../lib/utils'
 
 # Structure:
 # LifeApp (which is the timeline)
@@ -12,11 +13,14 @@ LifeApp = React.createClass
     props = props || @props
 
     {events, headers} = @processEvents(props.events)
+    objects = @getAllTimelineObjects(events, headers)
 
     return {
       events
       headers
+      objects
       timeline_hover_y: -1000
+      counter: 0
     }
 
   componentWillReceiveProps: (new_props, old_props) ->
@@ -34,12 +38,53 @@ LifeApp = React.createClass
     $("div#timeline-bar").mouseout () =>
       @setState({timeline_hover_y: -1000})
 
-  render: () ->
-    objects = @getAllTimelineObjects()
-    return React.createElement("div", {className: "col-sm-offset-2 col-sm-8"},
-      React.createElement(TimelineBar, {y: @state.timeline_hover_y}),
-      React.createElement("div", null, objects)
-    )
+    $("div#timeline-hover").click (event) =>
+      # We know the position in pixels of the click
+      y = @state.timeline_hover_y
+      new_date = @clickNear y
+
+      # Make the new event
+      event = {
+        date: new_date
+        rendered_date: new_date.format("MMMM D, YYYY")
+        edit_mode: true
+        detail: ""
+        key: @state.counter
+      }
+      @insertEventAt new_date, event
+
+  clickNear: (y) ->
+    # Determine the object being hovered nearest
+    objects = @getAllTimelineObjects(@state.events, @state.headers)
+    traversed = 0
+    for object in objects
+      traversed += $("#" + object.id).outerHeight()
+      if traversed > y
+        inside_object = object
+        break
+    if not inside_object?
+      throw Error("Didn't click near an event")
+
+    if inside_object.header?
+      return inside_object.header.moment
+    else if inside_object.event?
+      return inside_object.event.date
+    throw Error("Unknown element type")
+
+  insertEventAt: (date, event) ->
+    target = 0
+    for e, index in @state.events
+      if e.date.unix() < date.unix()
+        target = index
+        break
+
+    events = (x for x in @state.events)
+    events.splice(target, 0, event)
+    {events, headers} = @processEvents events
+    @setState({
+      events, headers, objects: @getAllTimelineObjects(events, headers),
+      counter: @state.counter + 1
+    })
 
   sortEvents: (events) ->
     # Sort all the events from newest to oldest
@@ -56,9 +101,10 @@ LifeApp = React.createClass
     for event in events
       # Make sure all the dates are moments
       if not event.date._isAMomentObject?
-        event.date = moment(event.date)
+        event.date = moment.utc(event.date).local()
         date = event.date.format("MMMM D, YYYY")
         event.rendered_date = date
+        event.key = "event:" + date + utils.hash(event.detail)
 
     events = @sortEvents events
 
@@ -66,31 +112,44 @@ LifeApp = React.createClass
     header_list = []
     for event in events
       if event.rendered_date not of headers
-        header_list.push {date: event.rendered_date}
+        header_list.push {
+          date: event.rendered_date,
+          moment: moment(event.rendered_date, "MMMM D, YYYY")
+          key: "header:" + event.rendered_date
+        }
         headers[event.rendered_date] = true
     return {events, headers: header_list}
 
-  getAllTimelineObjects: () ->
+  getAllTimelineObjects: (events, headers) ->
     # Reads the events and headers off of state, orders them, and returns them
-    {events, headers} = @state
     objects = []
     i = 0
-    key = 0
-    for header in headers
-      objects.push React.createElement Header, {key, header}, JSON.stringify(header)
-      key++
+    for header, j in headers
+      objects.push {key: header.key, header, id: "header_" + j}
       while i < events.length and events[i].rendered_date == header.date
         event = events[i]
-        objects.push React.createElement EventTile, {key, event}, JSON.stringify(event)
+        objects.push {key: event.key, event, id: "event_" + i}
         i++
-        key++
 
     return objects
+
+  render: () ->
+    timeline_list = []
+    for object in @state.objects
+      if object.header?
+        timeline_list.push React.createElement(Header, object)
+      else if object.event
+        timeline_list.push React.createElement(EventTile, object)
+
+    return React.createElement("div", {className: "col-sm-offset-2 col-sm-8"},
+      React.createElement(TimelineBar, {y: @state.timeline_hover_y}),
+      React.createElement("div", null, timeline_list)
+    )
 
 Header = React.createClass
   displayName: 'Header'
   render: () ->
-    return React.createElement("div", {className: 'header-tile'},
+    return React.createElement("div", {className: 'header-tile', id: @props.id},
       React.createElement("h4", null, @props.header.date)
     )
 
@@ -114,7 +173,8 @@ EventTile = React.createClass
       return event.detail
     else
       element = $('<div>').html(event.detail)
-      return element.children().get(0).innerHTML
+      first_child = element.children().get(0)
+      return if first_child? then first_child.innerHTML else ""
 
   prepareEvent: (event, show_all) ->
     return {
@@ -134,7 +194,7 @@ EventTile = React.createClass
     e.stopPropagation()
 
   render: () ->
-    return React.createElement("div", {className: "well", onClick: @handleClick},
+    return React.createElement("div", {className: "well", id: @props.id, onClick: @handleClick},
       React.createElement("div", {className: "event-arrow"})
       React.createElement("div", {className: "event-date"}, @state.to_display.date)
       React.createElement("div", {
