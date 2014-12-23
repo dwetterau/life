@@ -25,7 +25,10 @@ LifeApp = React.createClass
 
   render: () ->
     objects = @getAllTimelineObjects()
-    return React.createElement("div", {className: "col-sm-offset-2 col-sm-8"}, objects)
+    return React.createElement("div", {className: "col-sm-offset-2 col-sm-8"},
+      React.createElement(TimelineBar),
+      React.createElement("div", null, objects)
+    )
 
   sortEvents: (events) ->
     # Sort all the events from newest to oldest
@@ -121,11 +124,17 @@ EventTile = React.createClass
 
   render: () ->
     return React.createElement("div", {className: "well", onClick: @handleClick},
+      React.createElement("div", {className: "event-arrow"})
       React.createElement("div", {className: "event-date"}, @state.to_display.date)
       React.createElement("div", {
         className: "event-detail",
         dangerouslySetInnerHTML: {__html: @state.to_display.detail}
       })
     )
+
+TimelineBar = React.createClass
+  displayName: 'TimelineBar'
+  render: () ->
+    return React.createElement("div", {id: "timeline-bar"})
 
 module.exports = {LifeApp}
