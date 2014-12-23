@@ -1,10 +1,6 @@
 React = require 'react'
 moment = require 'moment'
 
-update_selection_value = (date) ->
-  $('#date').val(date.utc())
-  date.local()
-
 DaySelector = React.createClass
   displayName: "DaySelector"
   months: ['January', 'February', 'March', 'April', 'May', 'June', 'July',
@@ -45,7 +41,7 @@ DaySelector = React.createClass
         if @days[selections[1]] != state.date.date()
           state.date_suffix = @getDaySuffixIndex(1)
 
-    @setState(state)
+    @props.cb(state)
 
   getDaySuffixIndex: (day) ->
     if (day <= 3 or (day > 20 and day % 10 <= 3)) and day % 10 > 0
@@ -55,10 +51,10 @@ DaySelector = React.createClass
 
   getSelectionWithDate: () ->
     # Returns an array of the selections in month, days, and years
-    moment = @state.date
-    month = parseInt(moment.format("MM")) - 1
-    days = moment.date() - 1
-    years = 2014 - moment.year()
+    m = @state.date
+    month = parseInt(m.format("MM")) - 1
+    days = m.date() - 1
+    years = 2014 - m.year()
 
     return [month, days, years]
 
@@ -73,7 +69,6 @@ DaySelector = React.createClass
       "option", {key: i}, day) for day, i in @days when i < days_in_month)
     years = (React.createElement("option", {key: i}, year) for year, i in @years)
 
-    update_selection_value(@state.date)
     return React.createElement("div", className: "time",
       React.createElement("div", {className: 'selector'},
         React.createElement("select", {
@@ -135,14 +130,14 @@ TimeSelector = React.createClass
         state.date.set('hour', hour - 12)
       else
         state.date.set('hour', hour + 12)
-    @setState(state)
+    @props.cb(state)
 
   getSelectionWithDate: () ->
     # Returns hours, minutes, period
-    moment = @state.date
-    hour = parseInt(moment.format('hh')) - 1
-    minute = Math.floor(moment.minute() / 5)
-    period = if moment.hour() >= 12 then 1 else 0
+    m = @state.date
+    hour = parseInt(m.format('hh')) - 1
+    minute = Math.floor(m.minute() / 5)
+    period = if m.hour() >= 12 then 1 else 0
     return [hour, minute, period]
 
   render: () ->
@@ -152,7 +147,6 @@ TimeSelector = React.createClass
     minutes = (React.createElement("option", {key: i}, minute) for minute, i in @minutes)
     periods = (React.createElement("option", {key: i}, period) for period, i in @periods)
 
-    update_selection_value(@state.date)
     return React.createElement("div", className: "time", onChange: @handleChange,
       React.createElement("div", {className: 'selector'},
         React.createElement("select", {
@@ -183,16 +177,26 @@ TimeSelector = React.createClass
 
 Selector = React.createClass
   displayName: 'Selector'
-  getInitialState: () ->
+  getInitialState: (props) ->
+    props = props || @props
+
     return {
-      date: moment()
+      date: props.date
     }
 
+  updateParentState: (new_state) ->
+    @setState(new_state)
+
   render: () ->
-    return React.createElement("div", {className: "col-sm-offset-2 col-sm-8"},
-      React.createElement(TimeSelector, {className: "time", date: @state.date})
+    date = moment(@state.date).utc().toString()
+
+    return React.createElement("div", null,
+      React.createElement(TimeSelector,
+        {className: "time", date: @state.date, cb: @updateParentState})
       React.createElement("span", {className: "time"}, "on")
-      React.createElement(DaySelector, {className: "time", date: @state.date})
+      React.createElement(DaySelector,
+        {className: "time", date: @state.date, cb: @updateParentState})
+      React.createElement("input", {id: "date", name: "date", type: "hidden", value: date})
     )
 
-module.exports = {DaySelector, TimeSelector, Selector}
+module.exports = {Selector}

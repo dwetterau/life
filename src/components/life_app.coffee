@@ -31,6 +31,9 @@ LifeApp = React.createClass
         timeline_hover_y = @state.timeline_hover_y + (event.offsetY - 6)
         @setState({timeline_hover_y})
 
+    $("div#timeline-bar").mouseout () =>
+      @setState({timeline_hover_y: -1000})
+
   render: () ->
     objects = @getAllTimelineObjects()
     return React.createElement("div", {className: "col-sm-offset-2 col-sm-8"},
