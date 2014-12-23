@@ -14,19 +14,27 @@ LifeApp = React.createClass
     {events, headers} = @processEvents(props.events)
 
     return {
-      events, headers
+      events
+      headers
+      timeline_hover_y: -1000
     }
 
   componentWillReceiveProps: (new_props, old_props) ->
     @setState @getInitialState(new_props)
 
   componentDidMount: () ->
-    # TODO: add listeners and stuff here that we might want
+    $("div#timeline-bar").mousemove (event) =>
+      if event.target.id == 'timeline-bar'
+        @setState({timeline_hover_y: event.offsetY})
+      else if event.target.id == 'timeline-hover'
+        # add the offset - 6 to the current offset
+        timeline_hover_y = @state.timeline_hover_y + (event.offsetY - 6)
+        @setState({timeline_hover_y})
 
   render: () ->
     objects = @getAllTimelineObjects()
     return React.createElement("div", {className: "col-sm-offset-2 col-sm-8"},
-      React.createElement(TimelineBar),
+      React.createElement(TimelineBar, {y: @state.timeline_hover_y}),
       React.createElement("div", null, objects)
     )
 
@@ -135,6 +143,9 @@ EventTile = React.createClass
 TimelineBar = React.createClass
   displayName: 'TimelineBar'
   render: () ->
-    return React.createElement("div", {id: "timeline-bar"})
+    top = @props.y - 6
+    return React.createElement("div", {id: "timeline-bar"},
+      React.createElement("div", {id: "timeline-hover", style: {top}}, "+")
+    )
 
 module.exports = {LifeApp}
