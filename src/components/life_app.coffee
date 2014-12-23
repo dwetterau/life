@@ -32,25 +32,7 @@ LifeApp = React.createClass
     events.sort (a, b) ->
       b.date.unix() - a.date.unix()
 
-    # Iterate through all of the events and reverse each day (oldest to newest)
-    i = 0
-    current_date = d = events[0].rendered_date
-    j = 1
-    sort_function = (a, b) ->
-      a.date.unix() - b.date.unix()
-    new_events = []
-    while j <= events.length
-      event = events[j]
-      if j == events.length or event.rendered_date != current_date
-        # Slice, reverse sort
-        s = events.slice i, j
-        s.sort sort_function
-        new_events = new_events.concat s
-        i = j
-        current_date = event? and event.rendered_date
-      j++
-
-    return new_events
+    return events
 
   processEvents: (events) ->
     # Takes in the events and returns a dict with events and headers, both in sorted order
@@ -94,7 +76,9 @@ LifeApp = React.createClass
 Header = React.createClass
   displayName: 'Header'
   render: () ->
-    return React.createElement "div", {className: 'header-tile'}, @props.header.date
+    return React.createElement("div", {className: 'header-tile'},
+      React.createElement("h4", null, @props.header.date)
+    )
 
 EventTile = React.createClass
   displayName: 'EventTile'
@@ -105,9 +89,9 @@ EventTile = React.createClass
     initial = {
       event: props.event
       event_processed: false
-      show_all_detail: true
+      show_all_detail: false
     }
-    initial.to_display = @prepareEvent(props.event, true)
+    initial.to_display = @prepareEvent(props.event, false)
 
     return initial
 
@@ -120,7 +104,7 @@ EventTile = React.createClass
 
   prepareEvent: (event, show_all) ->
     return {
-      date: event.date.format('h:mm A')
+      date: event.date.format('h:mm a')
       detail: @getEventDetail(event, show_all)
     }
 
@@ -130,9 +114,6 @@ EventTile = React.createClass
 
     # Trigger the render
     @setState {to_display, show_all_detail}
-
-  componentDidMount: () ->
-    @switchDetail()
 
   handleClick: (e) ->
     @switchDetail()

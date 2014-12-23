@@ -14,6 +14,10 @@ body {
     margin-bottom: 75px;
 }
 
+a {
+    color: #3f51b5;
+}
+
 footer {
     position: absolute;
     bottom: 0;
@@ -45,4 +49,15 @@ div#editor {
 .selector {
     display: inline-block;
     border-bottom: 0;
+}
+
+.header-tile {
+    text-align: center;
+    padding-top: 15px;
+    padding-bottom: 5px;
+}
+
+.event-date {
+    color: #888888;
+    font-style: italic;
 }
