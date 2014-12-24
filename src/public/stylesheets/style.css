@@ -38,7 +38,7 @@ div.alert {
 }
 
 div#editor {
-    min-height: 250px;
+    min-height: 50px;
 }
 
 .time {
@@ -95,4 +95,8 @@ div.event-arrow {
     transform: rotate(45deg);
     background-color: #FFF;
     box-shadow: -2.5px 3px 5px rgba(0,0,0,.16);
+}
+
+.no-margin {
+    margin: 0
 }

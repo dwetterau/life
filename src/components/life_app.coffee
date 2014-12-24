@@ -1,6 +1,7 @@
 React = require 'react'
 moment = require 'moment'
 utils = require '../lib/utils'
+{EditEvent} = require './edit_event'
 
 # Structure:
 # LifeApp (which is the timeline)
@@ -12,6 +13,7 @@ LifeApp = React.createClass
   getInitialState: (props) ->
     props = props || @props
 
+    @initializeEvents(props.events)
     {events, headers} = @processEvents(props.events)
     objects = @getAllTimelineObjects(events, headers)
 
@@ -93,18 +95,17 @@ LifeApp = React.createClass
 
     return events
 
+  initializeEvents: (events) ->
+    for event in events
+      event.date = moment.utc(event.date).local()
+      date = event.date.format("MMMM D, YYYY")
+      event.rendered_date = date
+      event.key = "event:" + date + utils.hash(event.detail)
+
   processEvents: (events) ->
     # Takes in the events and returns a dict with events and headers, both in sorted order
     if events.length == 0
       return {events, headers: []}
-
-    for event in events
-      # Make sure all the dates are moments
-      if not event.date._isAMomentObject?
-        event.date = moment.utc(event.date).local()
-        date = event.date.format("MMMM D, YYYY")
-        event.rendered_date = date
-        event.key = "event:" + date + utils.hash(event.detail)
 
     events = @sortEvents events
 
@@ -161,7 +162,6 @@ EventTile = React.createClass
 
     initial = {
       event: props.event
-      event_processed: false
       show_all_detail: false
     }
     initial.to_display = @prepareEvent(props.event, false)
@@ -194,14 +194,17 @@ EventTile = React.createClass
     e.stopPropagation()
 
   render: () ->
-    return React.createElement("div", {className: "well", id: @props.id, onClick: @handleClick},
-      React.createElement("div", {className: "event-arrow"})
-      React.createElement("div", {className: "event-date"}, @state.to_display.date)
-      React.createElement("div", {
-        className: "event-detail",
-        dangerouslySetInnerHTML: {__html: @state.to_display.detail}
-      })
-    )
+    if @state.event.edit_mode
+      return React.createElement(EditEvent, {id: @props.id, event: @state.event})
+    else
+      return React.createElement("div", {className: "well", id: @props.id, onClick: @handleClick},
+        React.createElement("div", {className: "event-arrow"})
+        React.createElement("div", {className: "event-date"}, @state.to_display.date)
+        React.createElement("div", {
+          className: "event-detail",
+          dangerouslySetInnerHTML: {__html: @state.to_display.detail}
+        })
+      )
 
 TimelineBar = React.createClass
   displayName: 'TimelineBar'

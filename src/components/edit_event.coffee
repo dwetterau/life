@@ -22,7 +22,6 @@ EditEvent = React.createClass
   render: () ->
     return React.createElement("div", {className: 'well'},
       React.createElement("form", {
-        className: 'form-horizontal'
         id: "event_form",
         action: @state.action
         method: "POST"
@@ -50,7 +49,7 @@ EditEvent = React.createClass
 
         # Elements for the submit button
         React.createElement("div", {className: "form-group form-group-material-indigo"},
-          React.createElement("button", {className: "btn btn-success", type: "submit"},
+          React.createElement("button", {className: "btn btn-success no-margin", type: "submit"},
             React.createElement("span", {className: "ion-person-add"}, "Done")
           )
         )
