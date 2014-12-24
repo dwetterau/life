@@ -97,6 +97,6 @@ div.event-arrow {
     box-shadow: -2.5px 3px 5px rgba(0,0,0,.16);
 }
 
-.no-margin {
-    margin: 0
+.submit-button {
+    margin: 0;
 }

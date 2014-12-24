@@ -9,10 +9,8 @@ EditEvent = React.createClass
   getInitialState: (props) ->
     props = props || @props
 
-    {event} = props
-
     return {
-      event
+      event: props.event
       action: '/event/add'
     }
 
@@ -21,10 +19,13 @@ EditEvent = React.createClass
 
   render: () ->
     return React.createElement("div", {className: 'well'},
+      React.createElement("div", {className: "event-arrow"})
       React.createElement("form", {
         id: "event_form",
         action: @state.action
         method: "POST"
+        'data-event_key': @state.event.key
+        onSubmit: @props.submit_handler
       },
         # Elements for the time and date selection
         React.createElement("div", {className: "form-group form-group-material-indigo"},
@@ -48,8 +49,9 @@ EditEvent = React.createClass
         )
 
         # Elements for the submit button
-        React.createElement("div", {className: "form-group form-group-material-indigo"},
-          React.createElement("button", {className: "btn btn-success no-margin", type: "submit"},
+        React.createElement("div", {className: "form-group form-group-material-indigo text-right"},
+          React.createElement("button",
+            {className: "btn btn-success submit-button", type: "submit"},
             React.createElement("span", {className: "ion-person-add"}, "Done")
           )
         )

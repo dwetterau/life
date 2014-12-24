@@ -20,5 +20,5 @@ exports.post_event_add = (req, res) ->
     UserId: req.user.id
   }
   new_event.save().success () ->
-    res.send {status: 'ok'}
+    res.send {status: 'ok', new_event: new_event.to_json()}
   .failure fail

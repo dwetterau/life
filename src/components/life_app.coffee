@@ -23,6 +23,7 @@ LifeApp = React.createClass
       objects
       timeline_hover_y: -1000
       counter: 0
+      in_edit: false
     }
 
   componentWillReceiveProps: (new_props, old_props) ->
@@ -42,6 +43,10 @@ LifeApp = React.createClass
 
     $("div#timeline-hover").click (event) =>
       # We know the position in pixels of the click
+      if @state.in_edit
+        return
+      else
+        @setState({in_edit: true})
       y = @state.timeline_hover_y
       new_date = @clickNear y
 
@@ -88,6 +93,37 @@ LifeApp = React.createClass
       counter: @state.counter + 1
     })
 
+  submitHandler: (e) ->
+    key = $(e.target).data('event_key')
+    url = e.target.action
+    $.post url, {
+      date: $('#date').val()
+      detail: $('#detail').val()
+      labels: $('#labels').val()
+    },
+    (body) =>
+      if body.status == 'ok'
+        # Remove the event edit, add in the real event
+        new_event = body.new_event
+        @initializeEvents([new_event])
+
+        events = @state.events
+        # Determine the index of the edit event
+        index = -1
+        for event, i in events
+          if event.key == key
+            index = i
+            break
+        if index == -1
+          throw Error("Didn't find edit event")
+        events.splice(index, 1)
+        events.push new_event
+        {events, headers} = @processEvents events
+        objects = @getAllTimelineObjects(events, headers)
+        @setState({events, headers, objects, in_edit: false})
+
+    e.preventDefault()
+
   sortEvents: (events) ->
     # Sort all the events from newest to oldest
     events.sort (a, b) ->
@@ -130,6 +166,8 @@ LifeApp = React.createClass
       while i < events.length and events[i].rendered_date == header.date
         event = events[i]
         objects.push {key: event.key, event, id: "event_" + i}
+        if event.edit_mode
+          objects[objects.length - 1].submit_handler = @submitHandler
         i++
 
     return objects
@@ -195,7 +233,8 @@ EventTile = React.createClass
 
   render: () ->
     if @state.event.edit_mode
-      return React.createElement(EditEvent, {id: @props.id, event: @state.event})
+      return React.createElement(EditEvent, {
+        id: @props.id, event: @state.event, submit_handler: @props.submit_handler})
     else
       return React.createElement("div", {className: "well", id: @props.id, onClick: @handleClick},
         React.createElement("div", {className: "event-arrow"})
