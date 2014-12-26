@@ -162,7 +162,6 @@ LifeApp = React.createClass
   getAllTimelineObjects: (events, headers, view_time_range) ->
     if not view_time_range?
       view_time_range = @getViewTimeRange @state.view_type
-    debugger
     # Reads the events and headers off of state, orders them, and returns them
     objects = []
     i = 0
@@ -211,9 +210,11 @@ LifeApp = React.createClass
       else if object.event
         timeline_list.push React.createElement(EventTile, object)
 
-    return React.createElement("div", {className: "col-sm-offset-2 col-sm-8"},
-      React.createElement(AppNavigation, {switchView: @switchView})
-      React.createElement("div", null,
+    return React.createElement("div", null
+      React.createElement("div", {className: "col-sm-offset-2 col-sm-8"},
+        React.createElement(AppNavigation, {switchView: @switchView})
+      )
+      React.createElement("div", {className: "col-sm-offset-2 col-sm-8"},
         React.createElement(TimelineBar, {y: @state.timeline_hover_y})
         React.createElement("div", null, timeline_list)
       )
