@@ -16,7 +16,7 @@ LifeApp = React.createClass
     @initializeEvents(props.events)
     {events, headers} = @processEvents(props.events)
     view_type = "day"
-    objects = @getAllTimelineObjects(events, headers, view_type)
+    objects = @getAllTimelineObjects(events, headers, @getViewTimeRange(view_type))
 
     return {
       events
@@ -162,12 +162,15 @@ LifeApp = React.createClass
   getAllTimelineObjects: (events, headers, view_time_range) ->
     if not view_time_range?
       view_time_range = @getViewTimeRange @state.view_type
-
+    debugger
     # Reads the events and headers off of state, orders them, and returns them
     objects = []
     i = 0
     for header, j in headers
       if header.moment.unix() < view_time_range.start
+        # Skip over all the events for this header that are out of the window
+        while i < events.length and events[i].rendered_date == header.date
+          i++
         continue
       if header.moment.unix() >= view_time_range.end
         break
@@ -185,7 +188,7 @@ LifeApp = React.createClass
     if view_type == @state.view_type
       return
     view_time_range = @getViewTimeRange(view_type)
-    {objects} = @getAllTimelineObjects @state.events, @state.headers, view_time_range
+    objects = @getAllTimelineObjects @state.events, @state.headers, view_time_range
     @setState({view_type, objects})
 
   getViewTimeRange: (view_type) ->
@@ -198,7 +201,6 @@ LifeApp = React.createClass
     else if view_type == 'month'
       start = moment(moment().format("MM/1/YYYY"))
     end = moment(start).add(1, view_type)
-
     return {start: start.unix(), end: end.unix()}
 
   render: () ->
@@ -211,29 +213,37 @@ LifeApp = React.createClass
 
     return React.createElement("div", {className: "col-sm-offset-2 col-sm-8"},
       React.createElement(AppNavigation, {switchView: @switchView})
-      React.createElement(TimelineBar, {y: @state.timeline_hover_y})
-      React.createElement("div", null, timeline_list)
+      React.createElement("div", null,
+        React.createElement(TimelineBar, {y: @state.timeline_hover_y})
+        React.createElement("div", null, timeline_list)
+      )
     )
 
 AppNavigation = React.createClass
   displayName: 'AppNavigation'
 
-  switchAppView: (e) ->
-    @props.switchView e.target.dataset['view']
+  switchView: (e) ->
+    @props.switchView $(e.target).data('view')
 
   render: () ->
     # View changes
     React.createElement("div", {className: "btn-group"},
       React.createElement("a", {
-        className: "btn btn-default btn-warning btn-material-indigo dropdown-toggle"
+        className: "btn btn-material-indigo dropdown-toggle"
         'data-toggle': "dropdown"
-      }, "View",
+      }, "View ",
         React.createElement("span", {className: "caret"})
       )
       React.createElement("ul", className: "dropdown-menu",
-        React.createElement("li", {onClick: @switchAppView, 'data-view': 'day'}, 'Day')
-        React.createElement("li", {onClick: @switchAppView, 'data-view': 'week'}, 'Week')
-        React.createElement("li", {onClick: @switchAppView, 'data-view': 'month'}, 'Month')
+        React.createElement("li", null,
+          React.createElement("a", {href: "#", onClick: @switchView, 'data-view': 'day'}, 'Day')
+        )
+        React.createElement("li", null,
+          React.createElement("a", {href: "#", onClick: @switchView, 'data-view': 'week'}, 'Week')
+        )
+        React.createElement("li", null,
+          React.createElement("a", {href: "#", onClick: @switchView, 'data-view': 'month'}, 'Month')
+        )
       )
     )
 
@@ -259,7 +269,7 @@ EventTile = React.createClass
     return initial
 
   getEventDetail: (event, show_all) ->
-    if show_all or true
+    if show_all
       return event.detail
     else
       element = $('<div>').html(event.detail)
