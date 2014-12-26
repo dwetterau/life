@@ -7,15 +7,9 @@ React = require 'react'
 # Initialize the material effects
 $.material.init()
 
-if $('div#edit_event_container').length
-
-  # Initialize the time/date picker
-  event = {detail: "", date: moment()}
-  console.log "setting the event to be:", event
-  React.render(React.createElement(EditEvent, {event}), $("div#edit_event_container").get(0))
-
-if $('div#life_app').length
+life_app_div = document.getElementById 'life_app'
+if life_app_div
   # Copy in the initial state and render everything
-  initial_state = JSON.parse($('script#initial_state').html())
+  initial_state = JSON.parse(document.getElementById('initial_state').innerHTML)
   React.render(React.createElement(LifeApp, {events: initial_state}),
-    $("#life_app").get(0))
+    life_app_div)

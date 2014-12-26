@@ -15,7 +15,8 @@ LifeApp = React.createClass
 
     @initializeEvents(props.events)
     {events, headers} = @processEvents(props.events)
-    objects = @getAllTimelineObjects(events, headers)
+    view_type = "day"
+    objects = @getAllTimelineObjects(events, headers, view_type)
 
     return {
       events
@@ -24,6 +25,7 @@ LifeApp = React.createClass
       timeline_hover_y: -1000
       counter: 0
       in_edit: false
+      view_type
     }
 
   componentWillReceiveProps: (new_props, old_props) ->
@@ -125,9 +127,9 @@ LifeApp = React.createClass
     e.preventDefault()
 
   sortEvents: (events) ->
-    # Sort all the events from newest to oldest
+    # Sort all the events from oldest to newest
     events.sort (a, b) ->
-      b.date.unix() - a.date.unix()
+      a.date.unix() - b.date.unix()
 
     return events
 
@@ -157,11 +159,18 @@ LifeApp = React.createClass
         headers[event.rendered_date] = true
     return {events, headers: header_list}
 
-  getAllTimelineObjects: (events, headers) ->
+  getAllTimelineObjects: (events, headers, view_time_range) ->
+    if not view_time_range?
+      view_time_range = @getViewTimeRange @state.view_type
+
     # Reads the events and headers off of state, orders them, and returns them
     objects = []
     i = 0
     for header, j in headers
+      if header.moment.unix() < view_time_range.start
+        continue
+      if header.moment.unix() >= view_time_range.end
+        break
       objects.push {key: header.key, header, id: "header_" + j}
       while i < events.length and events[i].rendered_date == header.date
         event = events[i]
@@ -172,6 +181,26 @@ LifeApp = React.createClass
 
     return objects
 
+  switchView: (view_type) ->
+    if view_type == @state.view_type
+      return
+    view_time_range = @getViewTimeRange(view_type)
+    {objects} = @getAllTimelineObjects @state.events, @state.headers, view_time_range
+    @setState({view_type, objects})
+
+  getViewTimeRange: (view_type) ->
+    # Return the beginning and end time points as moments for the view type
+    # @return {start: unix_timestamp, end: unix_timestamp}
+    if view_type == 'day'
+      start = moment(moment().format("MM/DD/YYYY"))
+    else if view_type == 'week'
+      start = moment(moment().format('MM/DD/YYYY')).subtract(moment().weekday(), 'day')
+    else if view_type == 'month'
+      start = moment(moment().format("MM/1/YYYY"))
+    end = moment(start).add(1, view_type)
+
+    return {start: start.unix(), end: end.unix()}
+
   render: () ->
     timeline_list = []
     for object in @state.objects
@@ -181,8 +210,31 @@ LifeApp = React.createClass
         timeline_list.push React.createElement(EventTile, object)
 
     return React.createElement("div", {className: "col-sm-offset-2 col-sm-8"},
-      React.createElement(TimelineBar, {y: @state.timeline_hover_y}),
+      React.createElement(AppNavigation, {switchView: @switchView})
+      React.createElement(TimelineBar, {y: @state.timeline_hover_y})
       React.createElement("div", null, timeline_list)
+    )
+
+AppNavigation = React.createClass
+  displayName: 'AppNavigation'
+
+  switchAppView: (e) ->
+    @props.switchView e.target.dataset['view']
+
+  render: () ->
+    # View changes
+    React.createElement("div", {className: "btn-group"},
+      React.createElement("a", {
+        className: "btn btn-default btn-warning btn-material-indigo dropdown-toggle"
+        'data-toggle': "dropdown"
+      }, "View",
+        React.createElement("span", {className: "caret"})
+      )
+      React.createElement("ul", className: "dropdown-menu",
+        React.createElement("li", {onClick: @switchAppView, 'data-view': 'day'}, 'Day')
+        React.createElement("li", {onClick: @switchAppView, 'data-view': 'week'}, 'Week')
+        React.createElement("li", {onClick: @switchAppView, 'data-view': 'month'}, 'Month')
+      )
     )
 
 Header = React.createClass
@@ -207,7 +259,7 @@ EventTile = React.createClass
     return initial
 
   getEventDetail: (event, show_all) ->
-    if show_all
+    if show_all or true
       return event.detail
     else
       element = $('<div>').html(event.detail)
