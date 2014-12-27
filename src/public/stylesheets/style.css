@@ -100,3 +100,7 @@ div.event-arrow {
 .submit-button {
     margin: 0;
 }
+
+.float-right {
+    float: right;
+}

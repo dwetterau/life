@@ -8,6 +8,8 @@ utils = require '../lib/utils'
 #   - Maintains a list of day headers
 #   - Maintains a list of events
 
+RENDERED_DATE_FORMAT = "dddd, MMMM D, YYYY"
+
 LifeApp = React.createClass
   displayName: 'LifeApp'
   getInitialState: (props) ->
@@ -22,7 +24,6 @@ LifeApp = React.createClass
       events
       headers
       objects
-      timeline_hover_y: -1000
       counter: 0
       in_edit: false
       view_type
@@ -31,64 +32,25 @@ LifeApp = React.createClass
   componentWillReceiveProps: (new_props, old_props) ->
     @setState @getInitialState(new_props)
 
-  componentDidMount: () ->
-    $("div#timeline-bar").mousemove (event) =>
-      if event.target.id == 'timeline-bar'
-        @setState({timeline_hover_y: event.offsetY})
-      else if event.target.id == 'timeline-hover'
-        # add the offset - 6 to the current offset
-        timeline_hover_y = @state.timeline_hover_y + (event.offsetY - 6)
-        @setState({timeline_hover_y})
+  componentDidUpdate: () ->
+    if $("form#event_form").length
+      # Scroll to the edit pane
+      $('html, body').animate({
+        scrollTop: $("form#event_form").offset().top
+      }, 1000);
 
-    $("div#timeline-bar").mouseout () =>
-      @setState({timeline_hover_y: -1000})
-
-    $("div#timeline-hover").click (event) =>
-      # We know the position in pixels of the click
-      if @state.in_edit
-        return
-      else
-        @setState({in_edit: true})
-      y = @state.timeline_hover_y
-      new_date = @clickNear y
-
-      # Make the new event
-      event = {
-        date: new_date
-        rendered_date: new_date.format("MMMM D, YYYY")
-        edit_mode: true
-        detail: ""
-        key: @state.counter
-      }
-      @insertEventAt new_date, event
-
-  clickNear: (y) ->
-    # Determine the object being hovered nearest
-    objects = @getAllTimelineObjects(@state.events, @state.headers)
-    traversed = 0
-    for object in objects
-      traversed += $("#" + object.id).outerHeight()
-      if traversed > y
-        inside_object = object
-        break
-    if not inside_object?
-      throw Error("Didn't click near an event")
-
-    if inside_object.header?
-      return inside_object.header.moment
-    else if inside_object.event?
-      return inside_object.event.date
-    throw Error("Unknown element type")
-
-  insertEventAt: (date, event) ->
-    target = 0
-    for e, index in @state.events
-      if e.date.unix() < date.unix()
-        target = index
-        break
-
+  addEvent: () ->
+    new_date = moment()
+    # Make the new event
+    event = {
+      date: new_date
+      rendered_date: new_date.format(RENDERED_DATE_FORMAT)
+      edit_mode: true
+      detail: ""
+      key: 'TempEventKey' + @state.counter
+    }
     events = (x for x in @state.events)
-    events.splice(target, 0, event)
+    events.push event
     {events, headers} = @processEvents events
     @setState({
       events, headers, objects: @getAllTimelineObjects(events, headers),
@@ -136,7 +98,7 @@ LifeApp = React.createClass
   initializeEvents: (events) ->
     for event in events
       event.date = moment.utc(event.date).local()
-      date = event.date.format("MMMM D, YYYY")
+      date = event.date.format(RENDERED_DATE_FORMAT)
       event.rendered_date = date
       event.key = "event:" + date + utils.hash(event.detail)
 
@@ -153,7 +115,7 @@ LifeApp = React.createClass
       if event.rendered_date not of headers
         header_list.push {
           date: event.rendered_date,
-          moment: moment(event.rendered_date, "MMMM D, YYYY")
+          moment: moment(event.rendered_date, RENDERED_DATE_FORMAT)
           key: "header:" + event.rendered_date
         }
         headers[event.rendered_date] = true
@@ -193,12 +155,13 @@ LifeApp = React.createClass
   getViewTimeRange: (view_type) ->
     # Return the beginning and end time points as moments for the view type
     # @return {start: unix_timestamp, end: unix_timestamp}
+    format = "MM/DD/YYYY"
     if view_type == 'day'
-      start = moment(moment().format("MM/DD/YYYY"))
+      start = moment(moment().format(format), format)
     else if view_type == 'week'
-      start = moment(moment().format('MM/DD/YYYY')).subtract(moment().weekday(), 'day')
+      start = moment(moment().format(format), format).subtract(moment().weekday(), 'day')
     else if view_type == 'month'
-      start = moment(moment().format("MM/1/YYYY"))
+      start = moment(moment().format("MM/1/YYYY"), format)
     end = moment(start).add(1, view_type)
     return {start: start.unix(), end: end.unix()}
 
@@ -210,14 +173,19 @@ LifeApp = React.createClass
       else if object.event
         timeline_list.push React.createElement(EventTile, object)
 
-    return React.createElement("div", null
-      React.createElement("div", {className: "col-sm-offset-2 col-sm-8"},
-        React.createElement(AppNavigation, {switchView: @switchView})
-      )
-      React.createElement("div", {className: "col-sm-offset-2 col-sm-8"},
-        React.createElement(TimelineBar, {y: @state.timeline_hover_y})
+    if timeline_list.length
+      timeline = [
+        React.createElement(TimelineBar, null)
         React.createElement("div", null, timeline_list)
+      ]
+    else
+      timeline = React.createElement("i", {className: "text-center"},
+        "You have not recorded any events for this time range"
       )
+
+    return React.createElement("div", null
+      React.createElement(AppNavigation, {switchView: @switchView, addEvent: @addEvent})
+      React.createElement("div", {className: "col-sm-offset-2 col-sm-8"}, timeline)
     )
 
 AppNavigation = React.createClass
@@ -228,22 +196,29 @@ AppNavigation = React.createClass
 
   render: () ->
     # View changes
-    React.createElement("div", {className: "btn-group"},
-      React.createElement("a", {
-        className: "btn btn-material-indigo dropdown-toggle"
-        'data-toggle': "dropdown"
-      }, "View ",
-        React.createElement("span", {className: "caret"})
+    href = 'javascript:void(0)'
+    return React.createElement("div", {className: "col-sm-offset-2 col-sm-8"},
+      React.createElement("div", {key: "add-event-button", className: "btn-group"},
+        React.createElement(
+          "a", {href, className: "btn btn-success", onClick: @props.addEvent}, 'Add Event')
       )
-      React.createElement("ul", className: "dropdown-menu",
-        React.createElement("li", null,
-          React.createElement("a", {href: "#", onClick: @switchView, 'data-view': 'day'}, 'Day')
+      React.createElement("div", {key: "view-button", className: "btn-group float-right"},
+        React.createElement("a", {
+          className: "btn btn-material-indigo dropdown-toggle"
+          'data-toggle': "dropdown"
+        }, "View ",
+          React.createElement("span", {className: "caret"})
         )
-        React.createElement("li", null,
-          React.createElement("a", {href: "#", onClick: @switchView, 'data-view': 'week'}, 'Week')
-        )
-        React.createElement("li", null,
-          React.createElement("a", {href: "#", onClick: @switchView, 'data-view': 'month'}, 'Month')
+        React.createElement("ul", className: "dropdown-menu",
+          React.createElement("li", null,
+            React.createElement("a", {href, onClick: @switchView, 'data-view': 'day'}, 'Day')
+          )
+          React.createElement("li", null,
+            React.createElement("a", {href, onClick: @switchView, 'data-view': 'week'}, 'Week')
+          )
+          React.createElement("li", null,
+            React.createElement("a", {href, onClick: @switchView, 'data-view': 'month'}, 'Month')
+          )
         )
       )
     )
@@ -311,9 +286,6 @@ EventTile = React.createClass
 TimelineBar = React.createClass
   displayName: 'TimelineBar'
   render: () ->
-    top = @props.y - 6
-    return React.createElement("div", {id: "timeline-bar"},
-      React.createElement("div", {id: "timeline-hover", style: {top}}, "+")
-    )
+    return React.createElement("div", {id: "timeline-bar"})
 
 module.exports = {LifeApp}
