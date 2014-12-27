@@ -51,6 +51,10 @@ EditEvent = React.createClass
         # Elements for the submit button
         React.createElement("div", {className: "form-group form-group-material-indigo text-right"},
           React.createElement("button",
+            {className: "btn btn-danger submit-button", onClick: @props.cancel_handler},
+            React.createElement("span", {className: "ion-person-add"}, "Cancel")
+          )
+          React.createElement("button",
             {className: "btn btn-success submit-button", type: "submit"},
             React.createElement("span", {className: "ion-person-add"}, "Done")
           )

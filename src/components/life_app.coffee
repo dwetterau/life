@@ -9,6 +9,7 @@ utils = require '../lib/utils'
 #   - Maintains a list of events
 
 RENDERED_DATE_FORMAT = "dddd, MMMM D, YYYY"
+TEMP_EVENT_PREFIX = "TempEventKey"
 
 LifeApp = React.createClass
   displayName: 'LifeApp'
@@ -39,6 +40,10 @@ LifeApp = React.createClass
         scrollTop: $("form#event_form").offset().top
       }, 1000);
 
+  getNewObjects: (events) ->
+    {events, headers} = @processEvents events
+    return {events, headers, objects: @getAllTimelineObjects events, headers}
+
   addEvent: () ->
     new_date = moment()
     # Make the new event
@@ -47,15 +52,14 @@ LifeApp = React.createClass
       rendered_date: new_date.format(RENDERED_DATE_FORMAT)
       edit_mode: true
       detail: ""
-      key: 'TempEventKey' + @state.counter
+      key: TEMP_EVENT_PREFIX + @state.counter
     }
     events = (x for x in @state.events)
     events.push event
-    {events, headers} = @processEvents events
-    @setState({
-      events, headers, objects: @getAllTimelineObjects(events, headers),
-      counter: @state.counter + 1
-    })
+    new_state = @getNewObjects events
+    new_state.counter = @state.counter + 1
+    new_state.in_edit = true
+    @setState new_state
 
   submitHandler: (e) ->
     key = $(e.target).data('event_key')
@@ -82,11 +86,39 @@ LifeApp = React.createClass
           throw Error("Didn't find edit event")
         events.splice(index, 1)
         events.push new_event
-        {events, headers} = @processEvents events
-        objects = @getAllTimelineObjects(events, headers)
-        @setState({events, headers, objects, in_edit: false})
+        new_state = @getNewObjects events
+        new_state.in_edit = false
+        @setState new_state
 
     e.preventDefault()
+
+  cancelHandler: (e) ->
+    # Remove the event in edit mode
+    i = -1
+    events = (x for x in @state.events)
+    for event, index in events
+      if event.edit_mode
+        i = index
+        break
+    if i == -1 or not @state.in_edit
+      throw Error("Canceled when no event was being edited.")
+
+    event = events[i]
+    if event.key.indexOf(TEMP_EVENT_PREFIX) == 0
+      # Remove the event
+      events.splice(i, 1)
+    else
+      # Events that enter an edit mode will store their old state in .old
+      # Restore that state and delete the key afterwards
+      events[i] = event.old
+
+    new_state = @getNewObjects events
+    new_state.in_edit = false
+    @setState new_state
+
+    # Don't let the form submit
+    e.preventDefault()
+    e.stopPropagation()
 
   sortEvents: (events) ->
     # Sort all the events from oldest to newest
@@ -141,6 +173,7 @@ LifeApp = React.createClass
         objects.push {key: event.key, event, id: "event_" + i}
         if event.edit_mode
           objects[objects.length - 1].submit_handler = @submitHandler
+          objects[objects.length - 1].cancel_handler = @cancelHandler
         i++
 
     return objects
@@ -272,7 +305,9 @@ EventTile = React.createClass
   render: () ->
     if @state.event.edit_mode
       return React.createElement(EditEvent, {
-        id: @props.id, event: @state.event, submit_handler: @props.submit_handler})
+        id: @props.id, event: @state.event,
+        submit_handler: @props.submit_handler, cancel_handler: @props.cancel_handler
+      })
     else
       return React.createElement("div", {className: "well", id: @props.id, onClick: @handleClick},
         React.createElement("div", {className: "event-arrow"})
