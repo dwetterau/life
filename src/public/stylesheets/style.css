@@ -73,20 +73,6 @@ div#timeline-bar {
     );
 }
 
-div#timeline-hover {
-    width: 12px;
-    height: 12px;
-    left: -2px;
-    position: absolute;
-    background-color: #FFF;
-    border-radius: 3px;
-    box-shadow: 0 3px 10px rgba(0,0,0,.23),0 3px 10px rgba(0,0,0,.16);
-    text-align: center;
-    vertical-align: middle;
-    line-height: 12px;
-    cursor: pointer;
-}
-
 div.event-arrow {
     position: absolute;
     width: 15px;
@@ -95,6 +81,12 @@ div.event-arrow {
     transform: rotate(45deg);
     background-color: #FFF;
     box-shadow: -2.5px 3px 5px rgba(0,0,0,.16);
+}
+
+div.event-header {
+    float: right;
+    cursor: pointer;
+    font-size: large;
 }
 
 .submit-button {

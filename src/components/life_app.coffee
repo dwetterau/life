@@ -120,6 +120,26 @@ LifeApp = React.createClass
     e.preventDefault()
     e.stopPropagation()
 
+  beginEdit: (e) ->
+    if @state.in_edit
+      return
+    id = $(e.target).data('event_id')
+    index = -1
+    events = (x for x in @state.events)
+    for event, i in events
+      if event.id == id
+        index = i
+        break
+    if index = -1
+      throw Error("Couldn't find event entering edit mode.")
+
+    # Save the event's current state in event.old
+    event.old = Object.clone event
+    event.edit_mode = true
+    new_state = @getNewObjects events
+    new_state.in_edit = true
+    @setState new_state
+
   sortEvents: (events) ->
     # Sort all the events from oldest to newest
     events.sort (a, b) ->
@@ -132,7 +152,7 @@ LifeApp = React.createClass
       event.date = moment.utc(event.date).local()
       date = event.date.format(RENDERED_DATE_FORMAT)
       event.rendered_date = date
-      event.key = "event:" + date + utils.hash(event.detail)
+      event.key = "event_" + event.id
 
   processEvents: (events) ->
     # Takes in the events and returns a dict with events and headers, both in sorted order
@@ -148,7 +168,7 @@ LifeApp = React.createClass
         header_list.push {
           date: event.rendered_date,
           moment: moment(event.rendered_date, RENDERED_DATE_FORMAT)
-          key: "header:" + event.rendered_date
+          key: "header_" + event.rendered_date
         }
         headers[event.rendered_date] = true
     return {events, headers: header_list}
@@ -170,10 +190,12 @@ LifeApp = React.createClass
       objects.push {key: header.key, header, id: "header_" + j}
       while i < events.length and events[i].rendered_date == header.date
         event = events[i]
-        objects.push {key: event.key, event, id: "event_" + i}
+        objects.push {key: event.key, event, id: "event_" + event.id}
         if event.edit_mode
           objects[objects.length - 1].submit_handler = @submitHandler
           objects[objects.length - 1].cancel_handler = @cancelHandler
+        else
+          objects[objects.length - 1].edit_handler = @beginEdit
         i++
 
     return objects
@@ -203,8 +225,10 @@ LifeApp = React.createClass
     for object in @state.objects
       if object.header?
         timeline_list.push React.createElement(Header, object)
-      else if object.event
+      else if object.event?
         timeline_list.push React.createElement(EventTile, object)
+
+    console.log (x.key for x in @state.objects)
 
     if timeline_list.length
       timeline = [
@@ -302,6 +326,9 @@ EventTile = React.createClass
     @switchDetail()
     e.stopPropagation()
 
+  handleBeginEdit: (e) ->
+    @props.edit_handler
+
   render: () ->
     if @state.event.edit_mode
       return React.createElement(EditEvent, {
@@ -309,11 +336,17 @@ EventTile = React.createClass
         submit_handler: @props.submit_handler, cancel_handler: @props.cancel_handler
       })
     else
-      return React.createElement("div", {className: "well", id: @props.id, onClick: @handleClick},
-        React.createElement("div", {className: "event-arrow"})
-        React.createElement("div", {className: "event-date"}, @state.to_display.date)
+      return React.createElement("div", {className: "well", id: @props.id},
+        React.createElement("div", {key: "arrow", className: "event-arrow"})
+        React.createElement("div", {key: "buttons", className: "event-header"},
+          React.createElement("i", {
+            className: "mdi-content-create", 'data-event_id': @state.event.id,
+            onClick: @handleBeginEdit
+          })
+        )
+        React.createElement("div", {key: "date", className: "event-date"}, @state.to_display.date)
         React.createElement("div", {
-          className: "event-detail",
+          className: "event-detail", key: "detail"
           dangerouslySetInnerHTML: {__html: @state.to_display.detail}
         })
       )

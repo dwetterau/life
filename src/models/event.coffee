@@ -17,6 +17,7 @@ module.exports = (sequelize, DataTypes) ->
   , instanceMethods:
     to_json: () ->
       return {
+        id: this.id
         detail: this.detail
         date: this.date
       }
