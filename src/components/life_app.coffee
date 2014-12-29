@@ -108,9 +108,7 @@ LifeApp = React.createClass
       # Remove the event
       events.splice(i, 1)
     else
-      # Events that enter an edit mode will store their old state in .old
-      # Restore that state and delete the key afterwards
-      events[i] = event.old
+      events[i].edit_mode = false
 
     new_state = @getNewObjects events
     new_state.in_edit = false
@@ -130,11 +128,10 @@ LifeApp = React.createClass
       if event.id == id
         index = i
         break
-    if index = -1
+    if index == -1
       throw Error("Couldn't find event entering edit mode.")
 
     # Save the event's current state in event.old
-    event.old = Object.clone event
     event.edit_mode = true
     new_state = @getNewObjects events
     new_state.in_edit = true
@@ -228,12 +225,10 @@ LifeApp = React.createClass
       else if object.event?
         timeline_list.push React.createElement(EventTile, object)
 
-    console.log (x.key for x in @state.objects)
-
     if timeline_list.length
       timeline = [
-        React.createElement(TimelineBar, null)
-        React.createElement("div", null, timeline_list)
+        React.createElement(TimelineBar, {key: "timeline-bar"})
+        React.createElement("div", {key: "timeline-content"}, timeline_list)
       ]
     else
       timeline = React.createElement("i", {className: "text-center"},
@@ -327,7 +322,7 @@ EventTile = React.createClass
     e.stopPropagation()
 
   handleBeginEdit: (e) ->
-    @props.edit_handler
+    @props.edit_handler e
 
   render: () ->
     if @state.event.edit_mode
