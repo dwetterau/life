@@ -84,9 +84,17 @@ div.event-arrow {
 }
 
 div.event-header {
+    color: #888888;
     float: right;
     cursor: pointer;
-    font-size: large;
+    font-size: 14pt;
+}
+
+.event-header i:hover {
+    background-color: #eeeeee;
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
 }
 
 .submit-button {

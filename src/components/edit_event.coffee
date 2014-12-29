@@ -9,9 +9,11 @@ EditEvent = React.createClass
   getInitialState: (props) ->
     props = props || @props
 
+    action = if props.event.id? then '/event/update' else '/event/add'
+
     return {
       event: props.event
-      action: '/event/add'
+      action
     }
 
   componentWillReceiveProps: (new_props, old_props) ->
@@ -25,6 +27,7 @@ EditEvent = React.createClass
         action: @state.action
         method: "POST"
         'data-event_key': @state.event.key
+        'data-event_id': @state.event.id
         onSubmit: @props.submit_handler
       },
         # Elements for the time and date selection

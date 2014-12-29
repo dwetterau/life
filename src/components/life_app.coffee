@@ -63,8 +63,12 @@ LifeApp = React.createClass
 
   submitHandler: (e) ->
     key = $(e.target).data('event_key')
+    event_id = $(e.target).data('event_id')
     url = e.target.action
+    # Note: this should be the only thing left that relies on there only being one event
+    # in edit mode at a time.
     $.post url, {
+      id: event_id
       date: $('#date').val()
       detail: $('#detail').val()
       labels: $('#labels').val()
@@ -104,8 +108,8 @@ LifeApp = React.createClass
       throw Error("Canceled when no event was being edited.")
 
     event = events[i]
-    if event.key.indexOf(TEMP_EVENT_PREFIX) == 0
-      # Remove the event
+    if not event.id?
+      # Remove the event, it doesn't have an id yet
       events.splice(i, 1)
     else
       events[i].edit_mode = false
@@ -149,7 +153,7 @@ LifeApp = React.createClass
       event.date = moment.utc(event.date).local()
       date = event.date.format(RENDERED_DATE_FORMAT)
       event.rendered_date = date
-      event.key = "event_" + event.id
+      event.key = "event_" + event.id + "_" + utils.hash(event.detail + date)
 
   processEvents: (events) ->
     # Takes in the events and returns a dict with events and headers, both in sorted order
