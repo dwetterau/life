@@ -37,7 +37,7 @@ LifeApp = React.createClass
     if $("form#event_form").length
       # Scroll to the edit pane
       $('html, body').animate({
-        scrollTop: $("form#event_form").offset().top
+        scrollTop: Math.max(0, $("form#event_form").offset().top - 120)
       }, 1000);
 
   getNewObjects: (events) ->
@@ -321,7 +321,7 @@ EventTile = React.createClass
     # Trigger the render
     @setState {to_display, show_all_detail}
 
-  handleClick: (e) ->
+  handleExpand: (e) ->
     @switchDetail()
     e.stopPropagation()
 
@@ -335,6 +335,11 @@ EventTile = React.createClass
         submit_handler: @props.submit_handler, cancel_handler: @props.cancel_handler
       })
     else
+      if @state.show_all_detail
+        expand_class = "mdi-navigation-expand-less"
+      else
+        expand_class = "mdi-navigation-expand-more"
+
       return React.createElement("div", {className: "well", id: @props.id},
         React.createElement("div", {key: "arrow", className: "event-arrow"})
         React.createElement("div", {key: "buttons", className: "event-header"},
@@ -342,6 +347,7 @@ EventTile = React.createClass
             className: "mdi-content-create", 'data-event_id': @state.event.id,
             onClick: @handleBeginEdit
           })
+          React.createElement("i", {className: expand_class, onClick: @handleExpand})
         )
         React.createElement("div", {key: "date", className: "event-date"}, @state.to_display.date)
         React.createElement("div", {
