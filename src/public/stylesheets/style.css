@@ -88,13 +88,17 @@ div.event-header {
     float: right;
     cursor: pointer;
     font-size: 14pt;
+    min-height: 20px;
+    min-width: 20px
+}
+
+.event-header i {
+    padding: 5px;
+    border-radius: 16px;
 }
 
 .event-header i:hover {
     background-color: #eeeeee;
-    width: 20px;
-    height: 20px;
-    border-radius: 10px;
 }
 
 .submit-button {
