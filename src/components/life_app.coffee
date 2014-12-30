@@ -341,9 +341,9 @@ EventTile = React.createClass
 
     initial = {
       event: props.event
-      show_all_detail: false
+      show_all_detail: true
     }
-    initial.to_display = @prepareEvent(props.event, false)
+    initial.to_display = @prepareEvent(props.event, true)
 
     return initial
 
