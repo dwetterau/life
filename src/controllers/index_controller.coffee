@@ -5,7 +5,7 @@ exports.get_index = (req, res) ->
   }
   if req.user
     req.user.getEvents().success (events) ->
-      events = (e.to_json() for e in events)
+      events = (e.to_json() for e in events when e.state == 'active')
       render_dict.state = JSON.stringify(events)
       res.render 'index', render_dict
   else

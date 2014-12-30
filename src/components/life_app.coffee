@@ -141,6 +141,27 @@ LifeApp = React.createClass
     new_state.in_edit = true
     @setState new_state
 
+  archiveEvent: (e) ->
+    id = $(e.target).data('event_id')
+    $.post '/event/archive', {
+      id
+    }, (body) =>
+      if body.status != 'ok'
+        console.error("Failed to archive event")
+      index = -1
+      events = (x for x in @state.events)
+      for event, i in events
+        if event.id == id
+          index = i
+          break
+      if index == -1
+        throw Error("Couldn't find event entering edit mode.")
+
+      # Remove the event
+      events.splice(index, 1)
+      new_state = @getNewObjects events
+      @setState new_state
+
   sortEvents: (events) ->
     # Sort all the events from oldest to newest
     events.sort (a, b) ->
@@ -191,12 +212,15 @@ LifeApp = React.createClass
       objects.push {key: header.key, header, id: "header_" + j}
       while i < events.length and events[i].rendered_date == header.date
         event = events[i]
-        objects.push {key: event.key, event, id: "event_" + event.id}
+        object = {key: event.key, event, id: "event_" + event.id}
+
         if event.edit_mode
-          objects[objects.length - 1].submit_handler = @submitHandler
-          objects[objects.length - 1].cancel_handler = @cancelHandler
+          object.submit_handler = @submitHandler
+          object.cancel_handler = @cancelHandler
         else
-          objects[objects.length - 1].edit_handler = @beginEdit
+          object.edit_handler = @beginEdit
+          object.archive_handler = @archiveEvent
+        objects.push object
         i++
 
     return objects
@@ -221,6 +245,28 @@ LifeApp = React.createClass
     end = moment(start).add(1, view_type)
     return {start: start.unix(), end: end.unix()}
 
+  getNoObjectsHeader: () ->
+    time_range = @getViewTimeRange(@state.view_type)
+    start_moment = moment.unix(time_range.start)
+    end_moment = moment.unix(time_range.end)
+    if @state.view_type == 'day'
+      content = start_moment.format(RENDERED_DATE_FORMAT)
+      subtext_ending = "day."
+    else if @state.view_type == 'week'
+      content = 'Week of' + start_moment.format(RENDERED_DATE_FORMAT)
+      subtext_ending = "week."
+    else if @state.view_type == 'month'
+      content = start_moment.format("MMMM, YYYY")
+      subtext_ending = "month."
+    return [
+      React.createElement("div", {className: "header-tile", key: 'temp-header'},
+        React.createElement("h4", {key: 'temp-header-content'}, content)
+        React.createElement("i", {className: "text-center", key: 'temp-header-subtext'},
+          "You have not recorded any events for this " + subtext_ending
+        )
+      )
+    ]
+
   render: () ->
     timeline_list = []
     for object in @state.objects
@@ -235,9 +281,7 @@ LifeApp = React.createClass
         React.createElement("div", {key: "timeline-content"}, timeline_list)
       ]
     else
-      timeline = React.createElement("i", {className: "text-center"},
-        "You have not recorded any events for this time range"
-      )
+      timeline = @getNoObjectsHeader()
 
     return React.createElement("div", null
       React.createElement(AppNavigation, {switchView: @switchView, addEvent: @addEvent})
@@ -262,18 +306,21 @@ AppNavigation = React.createClass
         React.createElement("a", {
           className: "btn btn-material-indigo dropdown-toggle"
           'data-toggle': "dropdown"
-        }, "View ",
+        }, "Time Range ",
           React.createElement("span", {className: "caret"})
         )
         React.createElement("ul", className: "dropdown-menu",
           React.createElement("li", null,
-            React.createElement("a", {href, onClick: @switchView, 'data-view': 'day'}, 'Day')
+            React.createElement("a",
+              {href, onClick: @switchView, 'data-view': 'day'}, 'Today')
           )
           React.createElement("li", null,
-            React.createElement("a", {href, onClick: @switchView, 'data-view': 'week'}, 'Week')
+            React.createElement("a",
+              {href, onClick: @switchView, 'data-view': 'week'}, 'This week')
           )
           React.createElement("li", null,
-            React.createElement("a", {href, onClick: @switchView, 'data-view': 'month'}, 'Month')
+            React.createElement("a",
+              {href, onClick: @switchView, 'data-view': 'month'}, 'This month')
           )
         )
       )
@@ -323,7 +370,9 @@ EventTile = React.createClass
 
   handleExpand: (e) ->
     @switchDetail()
-    e.stopPropagation()
+
+  handleArchive: (e) ->
+    @props.archive_handler e
 
   handleBeginEdit: (e) ->
     @props.edit_handler e
@@ -343,6 +392,10 @@ EventTile = React.createClass
       return React.createElement("div", {className: "well", id: @props.id},
         React.createElement("div", {key: "arrow", className: "event-arrow"})
         React.createElement("div", {key: "buttons", className: "event-header"},
+          React.createElement("i", {
+            className: "mdi-content-archive", 'data-event_id': @state.event.id,
+            onClick: @handleArchive
+          })
           React.createElement("i", {
             className: "mdi-content-create", 'data-event_id': @state.event.id,
             onClick: @handleBeginEdit

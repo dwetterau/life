@@ -10,6 +10,11 @@ module.exports = (sequelize, DataTypes) ->
       type: DataTypes.DATE
       allowNull: false
     }
+    state: {
+      type: DataTypes.ENUM
+      values: ['active', 'archived', 'deleted']
+      defaultValue: 'active'
+    }
   , classMethods:
     associate: (models) ->
       Event.belongsTo(models.User)
