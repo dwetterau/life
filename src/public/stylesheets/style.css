@@ -105,6 +105,18 @@ div.event-header {
     margin: 0 0 0 .5em;
 }
 
+.navigation-button {
+    height: 36px;
+    font-size: 18pt;
+    text-align: center;
+    padding: 0 5px;
+}
+
+.navigation-button i {
+    color: #333;
+    line-height: 36px;
+}
+
 .float-right {
     float: right;
 }

@@ -19,7 +19,9 @@ LifeApp = React.createClass
     @initializeEvents(props.events)
     {events, headers} = @processEvents(props.events)
     view_type = "day"
-    objects = @getAllTimelineObjects(events, headers, @getViewTimeRange(view_type))
+    base_moment = moment()
+    {objects, past_events, future_events} =
+      @getAllTimelineObjects(events, headers, @getViewTimeRange(view_type, base_moment))
 
     return {
       events
@@ -28,6 +30,9 @@ LifeApp = React.createClass
       counter: 0
       in_edit: false
       view_type
+      base_moment
+      past_events
+      future_events
     }
 
   componentWillReceiveProps: (new_props, old_props) ->
@@ -42,7 +47,10 @@ LifeApp = React.createClass
 
   getNewObjects: (events) ->
     {events, headers} = @processEvents events
-    return {events, headers, objects: @getAllTimelineObjects events, headers}
+    new_state = @getAllTimelineObjects events, headers
+    new_state.events = events
+    new_state.headers = headers
+    return new_state
 
   addEvent: () ->
     new_date = moment()
@@ -201,10 +209,13 @@ LifeApp = React.createClass
     # Reads the events and headers off of state, orders them, and returns them
     objects = []
     i = 0
+    past_events = false
+    future_events = false
     for header, j in headers
       if header.moment.unix() < view_time_range.start
         # Skip over all the events for this header that are out of the window
         while i < events.length and events[i].rendered_date == header.date
+          past_events = true
           i++
         continue
       if header.moment.unix() >= view_time_range.end
@@ -223,37 +234,56 @@ LifeApp = React.createClass
         objects.push object
         i++
 
-    return objects
+    if i < events.length
+      future_events = true
+
+    return {objects, past_events, future_events}
 
   switchView: (view_type) ->
     if view_type == @state.view_type
       return
     view_time_range = @getViewTimeRange(view_type)
-    objects = @getAllTimelineObjects @state.events, @state.headers, view_time_range
-    @setState({view_type, objects})
+    new_state = @getAllTimelineObjects @state.events, @state.headers, view_time_range
+    new_state.view_type = view_type
+    @setState new_state
 
-  getViewTimeRange: (view_type) ->
+  changeTimeRange: (to_past) ->
+    m = @state.base_moment
+    if to_past
+      m.subtract 1, @state.view_type
+    else
+      m.add 1, @state.view_type
+
+    # Update the objects to fit in this range
+    new_state = @getAllTimelineObjects(@state.events, @state.headers)
+    new_state.base_moment = m
+    @setState new_state
+
+  getViewTimeRange: (view_type, base_moment) ->
     # Return the beginning and end time points as moments for the view type
     # @return {start: unix_timestamp, end: unix_timestamp}
+    if not base_moment?
+      m = @state.base_moment
+    else
+      m = base_moment
     format = "MM/DD/YYYY"
     if view_type == 'day'
-      start = moment(moment().format(format), format)
+      start = moment(m.format(format), format)
     else if view_type == 'week'
-      start = moment(moment().format(format), format).subtract(moment().weekday(), 'day')
+      start = moment(m.format(format), format).subtract(m.weekday(), 'day')
     else if view_type == 'month'
-      start = moment(moment().format("MM/1/YYYY"), format)
+      start = moment(m.format("MM/1/YYYY"), format)
     end = moment(start).add(1, view_type)
     return {start: start.unix(), end: end.unix()}
 
   getNoObjectsHeader: () ->
     time_range = @getViewTimeRange(@state.view_type)
     start_moment = moment.unix(time_range.start)
-    end_moment = moment.unix(time_range.end)
     if @state.view_type == 'day'
       content = start_moment.format(RENDERED_DATE_FORMAT)
       subtext_ending = "day."
     else if @state.view_type == 'week'
-      content = 'Week of' + start_moment.format(RENDERED_DATE_FORMAT)
+      content = 'Week of ' + start_moment.format(RENDERED_DATE_FORMAT)
       subtext_ending = "week."
     else if @state.view_type == 'month'
       content = start_moment.format("MMMM, YYYY")
@@ -283,10 +313,27 @@ LifeApp = React.createClass
     else
       timeline = @getNoObjectsHeader()
 
-    return React.createElement("div", null
-      React.createElement(AppNavigation, {switchView: @switchView, addEvent: @addEvent})
+    app_nav_props = () =>
+      key: "top_app_nav"
+      top: true
+      switchView: @switchView
+      changeTimeRange: @changeTimeRange
+      addEvent: @addEvent
+      past_events: @state.past_events
+      future_events: @state.future_events
+
+    app_array = [
+      React.createElement(AppNavigation, app_nav_props())
       React.createElement("div", {className: "col-sm-offset-2 col-sm-8"}, timeline)
-    )
+    ]
+    # TODO: Mess with this random constant
+    if timeline_list.length > 3
+      props = app_nav_props()
+      props.key = "bottom_app_nav"
+      props.top = false
+      app_array.push React.createElement(AppNavigation, props)
+
+    return React.createElement("div", null, app_array)
 
 AppNavigation = React.createClass
   displayName: 'AppNavigation'
@@ -294,7 +341,40 @@ AppNavigation = React.createClass
   switchView: (e) ->
     @props.switchView $(e.target).data('view')
 
+  goToPast: (e) ->
+    @props.changeTimeRange true
+
+  goToFuture: (e) ->
+    @props.changeTimeRange false
+
+  getNavigationButtons: () ->
+    href = 'javascript:void(0)'
+    className = "navigation-button btn btn-default"
+    disabled = {href, className: className + " disabled"}
+    past_options = disabled
+    future_options = disabled
+
+    if @props.past_events
+      past_options = {href, className, onClick: @goToPast}
+    if @props.future_events
+      future_options = {href, className, onClick: @goToFuture}
+
+    # Note: order is reversed because floating to the right
+    return [
+      React.createElement("div", {key: 'future', className: "btn-group float-right"},
+        React.createElement("a", future_options,
+          React.createElement("i", className: "mdi-navigation-chevron-right")
+        )
+      )
+      React.createElement("div", {key: 'past', className: "btn-group float-right"},
+        React.createElement("a", past_options,
+          React.createElement("i", className: "mdi-navigation-chevron-left")
+        )
+      )
+    ]
+
   render: () ->
+    navigation_buttons = @getNavigationButtons()
     # View changes
     href = 'javascript:void(0)'
     return React.createElement("div", {className: "col-sm-offset-2 col-sm-8"},
@@ -324,6 +404,7 @@ AppNavigation = React.createClass
           )
         )
       )
+      navigation_buttons
     )
 
 Header = React.createClass
