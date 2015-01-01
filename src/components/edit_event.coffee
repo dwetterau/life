@@ -19,6 +19,21 @@ EditEvent = React.createClass
   componentWillReceiveProps: (new_props, old_props) ->
     @setState @getInitialState(new_props)
 
+  componentDidMount: () ->
+    console.log "did this mount?"
+    $("input#labels").tokenfield {
+      # TODO: Add stuff to autocomplete (based on existing labels)
+      delay: 100
+      delimiter: " "
+    }
+    console.log "finished making it a tokenfield"
+
+  convertToString: (array) ->
+    if not array?
+      return ""
+    array.sort()
+    return array.join(" ")
+
   render: () ->
     return React.createElement("div", {className: 'well'},
       React.createElement("div", {className: "event-arrow"})
@@ -40,14 +55,14 @@ EditEvent = React.createClass
           React.createElement(Editor, {detail: @state.event.detail})
         )
 
-        # Elements for the labels (WIP)
-        React.createElement("div", {className: "form-group form-group-material-indigo"},
+        # Elements for the labels
+        React.createElement("div", {className: "form-group"},
           React.createElement("input", {
-            className: "form-control floating-label"
             type: "text"
             name: "labels"
             id: "labels"
-            placeholder: "Labels"
+            placeholder: "Enter labels..."
+            value: @convertToString(@state.event.labels)
           })
         )
 
