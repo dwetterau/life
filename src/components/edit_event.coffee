@@ -20,11 +20,13 @@ EditEvent = React.createClass
     @setState @getInitialState(new_props)
 
   componentDidMount: () ->
-    $("input#labels").tokenfield {
+    $("input#labels").tokenfield({
       # TODO: Add stuff to autocomplete (based on existing labels)
       delay: 100
       delimiter: " "
-    }
+      createTokensOnBlur: true
+    }).on 'tokenfield:createtoken', (e) ->
+      e.attrs.value = e.attrs.value.toLowerCase()
 
   convertToString: (array) ->
     if not array?

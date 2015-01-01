@@ -23,7 +23,7 @@ get_new_labels = (array_string, user_id, event_id) ->
     UserId: user_id
     EventId: event_id
 
-  (get_label(l) for l in unique)
+  (get_label(l.toLowerCase()) for l in unique)
 
 to_json_with_labels = (event, labels) ->
   event = event.to_json()
