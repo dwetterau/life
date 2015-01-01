@@ -14,32 +14,41 @@ make_unique = (array) ->
       continue
     m[e] = true
     result.push e
-  return result
+  result
+
+get_new_labels = (array_string, user_id, event_id) ->
+  unique = make_unique array_string.split(" ")
+  get_label = (label_string) ->
+    name: label_string
+    UserId: user_id
+    EventId: event_id
+
+  (get_label(l) for l in unique)
+
+to_json_with_labels = (event, labels) ->
+  event = event.to_json()
+  event.labels = (l.to_json() for l in labels)
+  return event
 
 exports.post_event_add = (req, res) ->
   req.assert('date', 'Must provide a valid date.').notEmpty()
   validation_errors = req.validationErrors()
-  fail = (errors) ->
+  fail = (errors...) ->
     res.send {status: 'error', errors: errors}
   if validation_errors
     return fail validation_errors
 
-  labels = make_unique(req.body.labels.split(" "))
   new_event = Event.build {
     date: req.body.date
     detail: req.body.detail
     UserId: req.user.id
   }
+  labels = req.body.labels
   new_event.save().success () ->
     # Create label objects for all of the labels
-    get_label = (label_string) ->
-      name: label_string
-      UserId: req.user.id
-      EventId: event.id
-    all_new_labels = (get_label(l) for l in labels)
-    return Label.bulkCreate all_new_labels
-  .success () ->
-    res.send {status: 'ok', new_event: new_event.to_json()}
+    return Label.bulkCreate get_new_labels(labels, req.user.id, new_event.id)
+  .success (new_labels) ->
+    res.send {status: 'ok', new_event: to_json_with_labels(new_event, new_labels)}
   .failure fail
 
 
@@ -47,12 +56,13 @@ exports.post_event_update = (req, res)  ->
   req.assert('date', 'Must provide a valid date.').notEmpty()
   req.assert('id', 'Must provide an event id.').isInt()
   validation_errors = req.validationErrors()
-  fail = (errors) ->
+  fail = (errors...) ->
     res.send {status: 'error', errors: errors}
   if validation_errors
     return fail validation_errors
 
   updated_event = null
+  labels=  req.body.labels
   Event.find(req.body.id).success (event) ->
     if event.UserId != req.user.id
       return fail(msg: "You are not authorized to edit that event.")
@@ -62,13 +72,18 @@ exports.post_event_update = (req, res)  ->
     updated_event = event
     return event.save()
   .success () ->
-    res.send {status: 'ok', new_event: updated_event.to_json()}
+    # Kill all the old labels
+    return Label.destroy {where: {EventId: updated_event.id}}
+  .success () ->
+    return Label.bulkCreate get_new_labels(labels, req.user.id, updated_event.id)
+  .success (new_labels) ->
+    res.send {status: 'ok', new_event: to_json_with_labels(updated_event, new_labels)}
   .failure fail
 
 exports.post_event_archive = (req, res) ->
   req.assert('id', 'Must provide an event id.').isInt()
   validation_errors = req.validationErrors()
-  fail = (errors) ->
+  fail = (errors...) ->
     res.send {status: 'error', errors: errors}
   if validation_errors
     return fail validation_errors

@@ -20,13 +20,11 @@ EditEvent = React.createClass
     @setState @getInitialState(new_props)
 
   componentDidMount: () ->
-    console.log "did this mount?"
     $("input#labels").tokenfield {
       # TODO: Add stuff to autocomplete (based on existing labels)
       delay: 100
       delimiter: " "
     }
-    console.log "finished making it a tokenfield"
 
   convertToString: (array) ->
     if not array?
@@ -62,7 +60,7 @@ EditEvent = React.createClass
             name: "labels"
             id: "labels"
             placeholder: "Enter labels..."
-            value: @convertToString(@state.event.labels)
+            defaultValue: @convertToString(@state.event.labels)
           })
         )
 

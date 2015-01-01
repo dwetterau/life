@@ -182,7 +182,9 @@ LifeApp = React.createClass
       event.date = moment.utc(event.date).local()
       date = event.date.format(RENDERED_DATE_FORMAT)
       event.rendered_date = date
-      event.key = "event_" + event.id + "_" + utils.hash(event.detail + date)
+      event.key = "event_" + event.id + "_" +
+        utils.hash(event.detail + date + JSON.stringify(event.labels))
+      event.labels = (l.name for l in event.labels)
 
   processEvents: (events) ->
     # Takes in the events and returns a dict with events and headers, both in sorted order
@@ -324,7 +326,8 @@ LifeApp = React.createClass
 
     app_array = [
       React.createElement(AppNavigation, app_nav_props())
-      React.createElement("div", {className: "col-sm-offset-2 col-sm-8"}, timeline)
+      React.createElement("div",
+        {key: "timeline", className: "col-sm-offset-2 col-sm-8"}, timeline)
     ]
     # TODO: Mess with this random constant
     if timeline_list.length > 3
