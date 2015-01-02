@@ -131,3 +131,24 @@ input#labels-tokenfield {
     border-radius: 0;
     min-height: 0;
 }
+
+div.nav-buttons-left-side {
+    width: 50%;
+    display: inline-block;
+    text-align: left;
+}
+
+div.nav-buttons-right-side {
+    width: 50%;
+    display: inline-block;
+    text-align: right;
+}
+
+.btn.small-btn {
+    padding-left: 1em;
+    padding-right: 1em;
+}
+
+.dropdown-menu.small-menu {
+    min-width: 0;
+}

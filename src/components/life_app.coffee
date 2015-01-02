@@ -362,52 +362,67 @@ AppNavigation = React.createClass
     if @props.future_events
       future_options = {href, className, onClick: @goToFuture}
 
-    # Note: order is reversed because floating to the right
     return [
-      React.createElement("div", {key: 'future', className: "btn-group float-right"},
-        React.createElement("a", future_options,
-          React.createElement("i", className: "mdi-navigation-chevron-right")
-        )
-      )
-      React.createElement("div", {key: 'past', className: "btn-group float-right"},
+      React.createElement("div", {key: 'past', className: "btn-group"},
         React.createElement("a", past_options,
           React.createElement("i", className: "mdi-navigation-chevron-left")
         )
       )
+      React.createElement("div", {key: 'future', className: "btn-group"},
+        React.createElement("a", future_options,
+          React.createElement("i", className: "mdi-navigation-chevron-right")
+        )
+      )
     ]
+
+  getViewChangeButton: () ->
+    href = 'javascript:void(0)'
+    React.createElement("div", {key: "view-button", className: "btn-group"},
+      React.createElement("a", {
+        className: "btn btn-material-indigo dropdown-toggle small-btn"
+        'data-toggle': "dropdown"
+      }, "Time Range ",
+        React.createElement("span", {className: "caret"})
+      )
+      React.createElement("ul", className: "dropdown-menu small-menu",
+        React.createElement("li", null,
+          React.createElement("a",
+            {href, onClick: @switchView, 'data-view': 'day'}, 'Today')
+        )
+        React.createElement("li", null,
+          React.createElement("a",
+            {href, onClick: @switchView, 'data-view': 'week'}, 'This week')
+        )
+        React.createElement("li", null,
+          React.createElement("a",
+            {href, onClick: @switchView, 'data-view': 'month'}, 'This month')
+        )
+      )
+    )
+
+  getAddEventButton: () ->
+    href = 'javascript:void(0)'
+    React.createElement("div", {key: "add-event-button", className: "btn-group"},
+      React.createElement(
+        "a", {href, className: "btn btn-success small-btn", onClick: @props.addEvent}, 'Add Event')
+    )
 
   render: () ->
     navigation_buttons = @getNavigationButtons()
+    right_side = [navigation_buttons]
+
+    left_side = [@getAddEventButton()]
+    if @props.top
+      left_side.push @getViewChangeButton()
+
     # View changes
-    href = 'javascript:void(0)'
     return React.createElement("div", {className: "col-sm-offset-2 col-sm-8"},
-      React.createElement("div", {key: "add-event-button", className: "btn-group"},
-        React.createElement(
-          "a", {href, className: "btn btn-success", onClick: @props.addEvent}, 'Add Event')
+      React.createElement("div", {className: "nav-buttons-left-side"}
+        left_side
       )
-      React.createElement("div", {key: "view-button", className: "btn-group float-right"},
-        React.createElement("a", {
-          className: "btn btn-material-indigo dropdown-toggle"
-          'data-toggle': "dropdown"
-        }, "Time Range ",
-          React.createElement("span", {className: "caret"})
-        )
-        React.createElement("ul", className: "dropdown-menu",
-          React.createElement("li", null,
-            React.createElement("a",
-              {href, onClick: @switchView, 'data-view': 'day'}, 'Today')
-          )
-          React.createElement("li", null,
-            React.createElement("a",
-              {href, onClick: @switchView, 'data-view': 'week'}, 'This week')
-          )
-          React.createElement("li", null,
-            React.createElement("a",
-              {href, onClick: @switchView, 'data-view': 'month'}, 'This month')
-          )
-        )
+      React.createElement("div", {className: "nav-buttons-right-side"},
+        right_side
       )
-      navigation_buttons
     )
 
 Header = React.createClass
