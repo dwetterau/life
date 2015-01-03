@@ -1,6 +1,10 @@
 passport = require 'passport'
 LocalStrategy = require 'passport-local'
 
+# Dropbox integration configs
+DropboxOAuth2Strategy = require('passport-dropbox-oauth2').Strategy
+{config} = require('./common')
+
 models = require '../models'
 
 passport.serializeUser (user, done) ->
@@ -21,6 +25,17 @@ passport.use new LocalStrategy {usernameField: 'username'}, (username, password,
         return done null, user
       else
         return done null, false, {message: 'Invalid username or password.'}
+
+passport.use new DropboxOAuth2Strategy {
+  clientID: config.get('api_key')
+  clientSecret: config.get('api_secret')
+  callbackURL: config.get('callback_url')
+}, (accessToken, refreshToken, profile, done) ->
+  # TODO: Look up the user based on the profile.id (Dropbox id) in our integrations table,
+  # Make sure the accessTokens match (not sure what the refresh token is)
+  err = null
+  user = {}
+  done err, user
 
 exports.isAuthenticated = (req, res, next) ->
   if req.isAuthenticated()

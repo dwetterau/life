@@ -11,6 +11,7 @@ cp -r ./src/public ./bin/public
 cp -r ./src/routes ./bin/routes
 cp -r ./src/tests ./bin/tests
 cp -r ./src/views ./bin/views
+cp -r ./src/integrations ./bin/integrations
 
 # Compile all coffeescript to js
 echo "Compiling Coffeescript to JS..."
