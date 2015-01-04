@@ -32,7 +32,7 @@ passport.use new DropboxOAuth2Strategy {
   callbackURL: config.get('callback_url')
 }, (accessToken, refreshToken, profile, done) ->
   # TODO: Look up the user based on the profile.id (Dropbox id) in our integrations table,
-  # Make sure the accessTokens match (not sure what the refresh token is)
+  # Update the access tokens with it
   err = null
   user = {}
   done err, user

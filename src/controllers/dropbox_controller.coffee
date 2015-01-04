@@ -1,3 +1,6 @@
+exports.post_dropbox_login = (req, res) ->
+
+
 exports.get_home_logged_out = (req, res) ->
   res.send {status: 'ok', logged_in: "false"}
 

@@ -12,6 +12,9 @@
       ul.nav.navbar-nav
         li(class=title=='Home'?'active':undefined)
           a(href='/') Home
+        if user
+          li(class=title=='Integrations'?'active':undefined)
+            a(href='/integrations') Integrations
       ul.nav.navbar-nav.navbar-right
         if !user
           li(class=title=='Login'?'active':undefined)
