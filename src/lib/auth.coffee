@@ -31,11 +31,7 @@ passport.use new DropboxOAuth2Strategy {
   clientSecret: config.get('api_secret')
   callbackURL: config.get('callback_url')
 }, (accessToken, refreshToken, profile, done) ->
-  # TODO: Look up the user based on the profile.id (Dropbox id) in our integrations table,
-  # Update the access tokens with it
-  err = null
-  user = {}
-  done err, user
+  done null, {profile, accessToken}
 
 exports.isAuthenticated = (req, res, next) ->
   if req.isAuthenticated()
