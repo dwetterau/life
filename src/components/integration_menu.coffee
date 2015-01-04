@@ -13,7 +13,7 @@ IntegrationMenu = React.createClass
 
   # TODO: Figure out where to put these in a more central location
   dropboxConnectHandler: (e) ->
-    window.location = '/auth/dropbox'
+    window.location = '/integrations/dropbox'
 
   # A function of state that returns the rendered modules in the right array
   getModules: () ->

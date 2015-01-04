@@ -32,9 +32,9 @@ router.post '/event/archive', passport_config.isAuthenticated, event_controller.
 router.get '/integrations', passport_config.isAuthenticated, integration_controller.get_index
 
 # Dropbox integration auth routes
-router.get '/auth/dropbox/', passport_config.isAuthenticated,
+router.get '/integrations/dropbox', passport_config.isAuthenticated,
   dropbox_controller.get_connect_dropbox
-router.get '/auth/dropbox/callback', passport_config.isAuthenticated,
+router.get '/integrations/dropbox/callback', passport_config.isAuthenticated,
   dropbox_controller.get_connect_dropbox_callback
 
 module.exports = router
