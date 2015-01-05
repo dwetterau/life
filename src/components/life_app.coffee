@@ -40,10 +40,13 @@ LifeApp = React.createClass
 
   componentDidUpdate: () ->
     if $("form#event_form").length
-      # Scroll to the edit pane
-      $('html, body').animate({
-        scrollTop: Math.max(0, $("form#event_form").offset().top - 120)
-      }, 1000);
+      @scrollToEdit()
+
+  scrollToEdit: () ->
+    # Scroll to the edit pane
+    $('html, body').animate({
+      scrollTop: Math.max(0, $("form#event_form").offset().top - 120)
+    }, 1000);
 
   getNewObjects: (events) ->
     {events, headers} = @processEvents events
@@ -53,6 +56,9 @@ LifeApp = React.createClass
     return new_state
 
   addEvent: () ->
+    # Don't add another if we are editing something
+    if @state.in_edit
+      return
     new_date = moment()
     # Make the new event
     event = {
@@ -61,12 +67,13 @@ LifeApp = React.createClass
       edit_mode: true
       detail: ""
       key: TEMP_EVENT_PREFIX + @state.counter
+      temp_event: true
     }
-    events = (x for x in @state.events)
-    events.push event
-    new_state = @getNewObjects events
-    new_state.counter = @state.counter + 1
-    new_state.in_edit = true
+    new_state = {
+      temp_event: @createEventTileObject(event)
+      counter: @state.counter + 1
+      in_edit: true
+    }
     @setState new_state
 
   submitHandler: (e) ->
@@ -86,45 +93,58 @@ LifeApp = React.createClass
         # Remove the event edit, add in the real event
         new_event = body.new_event
         @initializeEvents([new_event])
-
         events = @state.events
-        # Determine the index of the edit event
-        index = -1
-        for event, i in events
-          if event.key == key
-            index = i
-            break
-        if index == -1
-          throw Error("Didn't find edit event")
-        events.splice(index, 1)
+
+        if @inlineEditing()
+          # If we were editing inline, remove the old event
+          # Determine the index of the edit event
+          index = -1
+          for event, i in events
+            if event.key == key
+              index = i
+              break
+          if index == -1
+            throw Error("Didn't find edit event")
+          events.splice(index, 1)
+
         events.push new_event
         new_state = @getNewObjects events
         new_state.in_edit = false
+        new_state.temp_event = null
+
         @setState new_state
 
     e.preventDefault()
 
   cancelHandler: (e) ->
-    # Remove the event in edit mode
-    i = -1
-    events = (x for x in @state.events)
-    for event, index in events
-      if event.edit_mode
-        i = index
-        break
-    if i == -1 or not @state.in_edit
-      throw Error("Canceled when no event was being edited.")
-
-    event = events[i]
-    if not event.id?
-      # Remove the event, it doesn't have an id yet
-      events.splice(i, 1)
+    # If the event was a temp event, just delete it
+    if not @inlineEditing()
+      new_state = {
+        temp_event: null
+        in_edit: false
+      }
+      @setState new_state
     else
-      events[i].edit_mode = false
+      # Remove the event in edit mode
+      i = -1
+      events = (x for x in @state.events)
+      for event, index in events
+        if event.edit_mode
+          i = index
+          break
+      if i == -1 or not @state.in_edit
+        throw Error("Canceled when no event was being edited.")
 
-    new_state = @getNewObjects events
-    new_state.in_edit = false
-    @setState new_state
+      event = events[i]
+      if not event.id?
+        # Remove the event, it doesn't have an id yet
+        events.splice(i, 1)
+      else
+        events[i].edit_mode = false
+
+      new_state = @getNewObjects events
+      new_state.in_edit = false
+      @setState new_state
 
     # Don't let the form submit
     e.preventDefault()
@@ -205,6 +225,16 @@ LifeApp = React.createClass
         headers[event.rendered_date] = true
     return {events, headers: header_list}
 
+  createEventTileObject: (event) ->
+    object = {key: event.key, event, id: "event_" + event.id}
+    if event.edit_mode
+      object.submit_handler = @submitHandler
+      object.cancel_handler = @cancelHandler
+    else
+      object.edit_handler = @beginEdit
+      object.archive_handler = @archiveEvent
+    return object
+
   getAllTimelineObjects: (events, headers, view_time_range) ->
     if not view_time_range?
       view_time_range = @getViewTimeRange @state.view_type
@@ -224,16 +254,7 @@ LifeApp = React.createClass
         break
       objects.push {key: header.key, header, id: "header_" + j}
       while i < events.length and events[i].rendered_date == header.date
-        event = events[i]
-        object = {key: event.key, event, id: "event_" + event.id}
-
-        if event.edit_mode
-          object.submit_handler = @submitHandler
-          object.cancel_handler = @cancelHandler
-        else
-          object.edit_handler = @beginEdit
-          object.archive_handler = @archiveEvent
-        objects.push object
+        objects.push @createEventTileObject(events[i])
         i++
 
     if i < events.length
@@ -241,7 +262,14 @@ LifeApp = React.createClass
 
     return {objects, past_events, future_events}
 
+  # Returns if we are editing an event inline or not. If so, we shouldn't allow view changes.
+  # TODO: Make this display a warning if it returns false.
+  inlineEditing: () ->
+    return @state.in_edit and not @state.temp_event?
+
   switchView: (view_type) ->
+    if @inlineEditing()
+      return
     if view_type == @state.view_type
       return
     view_time_range = @getViewTimeRange(view_type)
@@ -250,6 +278,8 @@ LifeApp = React.createClass
     @setState new_state
 
   changeTimeRange: (to_past) ->
+    if @inlineEditing()
+      return
     m = @state.base_moment
     if to_past
       m.subtract 1, @state.view_type
@@ -324,11 +354,16 @@ LifeApp = React.createClass
       past_events: @state.past_events
       future_events: @state.future_events
 
-    app_array = [
-      React.createElement(AppNavigation, app_nav_props())
-      React.createElement("div",
-        {key: "timeline", className: "col-sm-offset-2 col-sm-8"}, timeline)
-    ]
+    app_array = [React.createElement(AppNavigation, app_nav_props())]
+    if @state.temp_event?
+      app_array.push React.createElement(
+        "div",
+        {key: "temp-event-container", className: "container col-sm-offset-2 col-sm-8"},
+        React.createElement(EventTile, @state.temp_event)
+      )
+    app_array.push React.createElement("div",
+      {key: "timeline", className: "col-sm-offset-2 col-sm-8"}, timeline)
+
     # TODO: Mess with this random constant
     if timeline_list.length > 3
       props = app_nav_props()

@@ -36,7 +36,9 @@ EditEvent = React.createClass
 
   render: () ->
     return React.createElement("div", {className: 'well'},
-      React.createElement("div", {className: "event-arrow"})
+      React.createElement("div",
+        {className: if @state.event.temp_event then "" else "event-arrow"}
+      )
       React.createElement("form", {
         id: "event_form",
         action: @state.action

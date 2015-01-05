@@ -133,13 +133,13 @@ input#labels-tokenfield {
 }
 
 div.nav-buttons-left-side {
-    width: 50%;
+    width: 75%;
     display: inline-block;
     text-align: left;
 }
 
 div.nav-buttons-right-side {
-    width: 50%;
+    width: 25%;
     display: inline-block;
     text-align: right;
 }
