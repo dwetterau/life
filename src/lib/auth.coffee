@@ -12,6 +12,8 @@ passport.serializeUser (user, done) ->
 
 passport.deserializeUser (id, done) ->
   models.User.find(id).success (user) ->
+    # Capitalize the username
+    user.username = user.username.charAt(0).toUpperCase() + user.username.slice(1)
     done null, user
   .failure (err) ->
     done err
