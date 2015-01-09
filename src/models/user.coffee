@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) ->
       User.hasMany(models.Event, {as: 'events', foreignKey: 'UserId'})
       User.hasMany(models.Label)
       User.hasMany(models.Integration)
+      User.hasMany(models.Image)
   , instanceMethods:
 
     hash_and_set_password: (unhashed_password, next) ->

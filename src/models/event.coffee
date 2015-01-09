@@ -1,5 +1,3 @@
-bcrypt = require 'bcrypt'
-
 module.exports = (sequelize, DataTypes) ->
   Event = sequelize.define "Event",
     detail: {
@@ -19,6 +17,7 @@ module.exports = (sequelize, DataTypes) ->
     associate: (models) ->
       Event.belongsTo(models.User)
       Event.hasMany(models.Label)
+      Event.hasMany(models.Image)
   , instanceMethods:
     to_json: () ->
       return {

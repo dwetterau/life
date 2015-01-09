@@ -1,10 +1,12 @@
 async = require 'async'
 Dropbox = require 'dropbox'
 fs = require 'fs'
+jade = require 'jade'
 moment = require 'moment'
+path_lib = require 'path'
 uuid = require 'uuid'
 {config, constants} = require '../../lib/common'
-{Integration} = require '../../models'
+{Event, Image, Integration} = require '../../models'
 
 # The initial approach for this program will be as follows:
 # 1. get the latest cursor for all dropbox accounts (don't include_media_info,
@@ -15,14 +17,15 @@ uuid = require 'uuid'
 # 4. Go back to 3 if needed (calling delta again if there were more changes)
 # 5. For all changed image files, download them with the /thumbnail endpoint
 #     to a folder that nginx can serve quickly
-# 6. Store metadata about each downloaded photo to get a unique photo id and
-#     connect it to user for easier account destruction
-# 7. Create a new event for that user at the earliest time of a photo in the
+# 6. Create a new event for that user at the earliest time of a photo in the
 #     delta and make the detail contain links to the new images
+# 7. Store metadata about each downloaded photo to get a unique photo id and
+#     connect it to user for easier account destruction
 # 8. Get the latest cursor again (no include_media_info) and wait on the
 #     longpoll delta call, return to 2
 listenForPhotos = (client, integration) ->
   pendingImages = {}
+  lastUpdatedEvent = {id: null}
 
   # Just used to get the cursors to longpoll with.
   # It should be the callback to the initial latestCursor call without parameters
@@ -46,10 +49,10 @@ listenForPhotos = (client, integration) ->
     for change in pulledChanges.changes
       # Determine if the file is a new image
       s = change.stat
-      photoExtension = (path) ->
+      photoExtension = (p) ->
         supported_extensions = ['.jpg', '.jpeg', '.png', '.tiff', '.tif', '.gif', '.bmp']
         for e in supported_extensions
-          if path.length > e.length and path.indexOf e == path.length - e.length
+          if p.length > e.length and p.indexOf e == p.length - e.length
             return true
         return false
 
@@ -57,7 +60,8 @@ listenForPhotos = (client, integration) ->
       if not change.wasRemoved and s and s.isFile and photoExtension path
         date = moment(s.modifiedAt)
         id = uuid.v4()
-        pendingImages[path] = {path, id, date, mimeType: s.mimeType, UserId: integration.UserId}
+        pendingImages[path] =
+          {path, uuid: id, date, mimeType: s.mimeType, UserId: integration.UserId}
 
     # Keep pulling if we have to
     if pulledChanges.shouldPullAgain
@@ -76,7 +80,7 @@ listenForPhotos = (client, integration) ->
       if error
         console.log "There was an error downloading a thumbnail"
         return callback(error)
-      new_path = config.get('dropbox_photo_dir') + '/' + size + '/' + data.id
+      new_path = path_lib.join(config.get('dropbox_photo_dir'), size + '/' + data.uuid)
       fs.writeFile new_path, buffer, (error) ->
         if error
           console.log "Error writing thumbnail to disk"
@@ -84,29 +88,144 @@ listenForPhotos = (client, integration) ->
 
         callback(null)
 
+  updatedLongAgo = () ->
+    diff = lastUpdatedEvent.time.fromNow(true)
+    if diff.indexOf 'seconds' == 0
+      return false
+    if diff.indexOf 'minute' >= 2
+      # either happened within the last minute or hour
+      time = diff.split(' ')[0]
+      if time == 'a'
+        return false
+      return time > 15
+    return true
+
+  getEarliestPhotoDate = () ->
+    min = null
+    for p, data of pendingImages
+      if not min?
+        min = moment(data.date)
+      else
+        t = moment(data.date)
+        if t.isBefore min
+          min = t
+    return min.toDate()
+
+  getEventDetail = (existingImages, callback) ->
+    # Merge the new photos into the existing ones. Overwriting ones with the same path
+    allImages = {}
+    for image in existingImages
+      allImages[image.path] = image
+
+    for p, data of pendingImages
+      allImages[p] = data
+
+    imageRows = []
+    row = []
+    for p, image of allImages
+      if row.length < 4
+        row.push image
+      else
+        imageRows.push row
+        row = []
+    if row.length
+      imageRows.push row
+
+    # Render the image rows
+    template = path_lib.join(__dirname, '../../views/image/image_detail.jade')
+    jade.renderFile template, {imageRows}, callback
+
+  createOrUpdateEvent = (callback) ->
+    # Step 6
+    saveEvent = (event) ->
+      event.save().then () ->
+        lastUpdatedEvent.id = event.id
+        lastUpdatedEvent.time = moment()
+        callback(null, event.id)
+      .catch callback
+
+    makeNewEvent = () ->
+      # Create a new event
+      eventDictionary = {
+        date: getEarliestPhotoDate()
+        UserId: integration.UserId
+        state: 'active'
+      }
+      getEventDetail [], (error, detail) ->
+        if error
+          console.log "error rendering image detail"
+          return callback error
+        eventDictionary.detail = detail
+        event = Event.build eventDictionary
+        saveEvent(event)
+
+    if not lastUpdatedEvent.id? or updatedLongAgo()
+      makeNewEvent()
+    else
+      # Update an existing event
+      Event.find({where: {id: lastUpdatedEvent.id}, include: [Image]}).then (event) ->
+        if event.state != 'active'
+          return makeNewEvent()
+        existingImages = (image.to_json() for image in event.Images)
+        getEventDetail existingImages, (error, detail) ->
+          if error
+            console.log "error rendering image detail"
+            return callback error
+          event.detail = detail
+          saveEvent(event)
+      .catch callback
+
+  savePhotoMetadata = (callback) ->
+    new_images = []
+    for path, data of pendingImages
+      new_images.push {
+        path
+        date: data.date
+        uuid: data.uuid
+        mime: data.mimeType
+        UserId: integration.UserId
+        EventId: lastUpdatedEvent.id
+      }
+    Image.bulkCreate(new_images).then () ->
+      callback()
+    .catch callback
 
   processPhoto = (data, callback) ->
     sizes = ['m', 'xl']
     async.each sizes, ((size, c) -> downloadAndSaveThumbnail data, size, c), callback
 
-
   processNewPhotos = (cursor) ->
-    # Download the photos, put them in the Db, make the event
-    console.log "Step 5"
-    data = (d for path, d of pendingImages)
-    async.each data, ((d, c) -> processPhoto d, c), (error) ->
-      if error
-        return console.log "Some thumbnail failed to download or save"
-
-      console.log "Finished saving images to disk", pendingImages
-      # Step 6 and 7 here
-
-      # Free up the memory
-      pendingImages = {}
-
-      # Step 8
-      console.log "Step 8"
+    pollAgain = () ->
       longpollDelta cursor
+
+    # If there are no images, there are none to process
+    if Object.keys(pendingImages).length == 0
+      return pollAgain()
+
+    # Download the photos, put them in the Db, make the event
+    data = (d for path, d of pendingImages)
+    async.series [
+      # Step 5
+      (callback) ->
+        console.log "Step 5"
+        async.each data, ((d, c) -> processPhoto d, c), callback
+
+      # Step 6
+      (callback) ->
+        console.log "Step 6"
+        createOrUpdateEvent callback
+
+      # Step 7
+      (callback) ->
+        console.log "Step 7"
+        savePhotoMetadata callback
+    ], (error) ->
+      if error
+        console.log "error while processing photos"
+        return console.log error
+      console.log "Step 8"
+      pendingImages = {}
+      pollAgain()
 
   longpollDelta = (cursor) ->
     pollingCallback = (error, pollResult) ->
@@ -136,7 +255,7 @@ listenForPhotos = (client, integration) ->
   console.log "Step 1"
   client.latestCursor latestCursorCallback
 
-Integration.findAll({where: {type: 'dropbox'}}).success (integrations) ->
+Integration.findAll({where: {type: 'dropbox'}}).then (integrations) ->
   for integration in integrations
     client = new Dropbox.Client {token: integration.key}
     listenForPhotos(client, integration)

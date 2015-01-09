@@ -1,5 +1,3 @@
-bcrypt = require 'bcrypt'
-
 module.exports = (sequelize, DataTypes) ->
   Label = sequelize.define "Label",
     name: {
