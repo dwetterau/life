@@ -1,0 +1,5 @@
+each row in imageRows
+  .image-row
+    each image in row
+      a(href="/image/xl/" + image.uuid)
+        img(src="/image/m/" + image.uuid alt="Dropbox image from #{image.path}")
