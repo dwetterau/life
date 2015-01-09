@@ -127,7 +127,7 @@ listenForPhotos = (client, integration) ->
         row.push image
       else
         imageRows.push row
-        row = []
+        row = [image]
     if row.length
       imageRows.push row
 
