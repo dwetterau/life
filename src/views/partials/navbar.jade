@@ -10,11 +10,16 @@
         | Life
     .collapse.navbar-collapse.navbar-responsive-collapse
       ul.nav.navbar-nav
-        li(class=title=='Home'?'active':undefined)
-          a(href='/') Home
         if user
+          li(class=title=='Timeline'?'active':undefined)
+            a(href='/') Timeline
+          li(class=title=='Archive'?'active':undefined)
+            a(href='/archive') Archive
           li(class=title=='Integrations'?'active':undefined)
             a(href='/integrations') Integrations
+        else
+          li(class=title=='Welcome'?'active':undefined)
+            a(href='/') Welcome
       ul.nav.navbar-nav.navbar-right
         if !user
           li(class=title=='Login'?'active':undefined)

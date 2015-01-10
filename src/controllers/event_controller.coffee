@@ -80,7 +80,7 @@ exports.post_event_update = (req, res)  ->
     res.send {status: 'ok', new_event: to_json_with_labels(updated_event, new_labels)}
   .failure fail
 
-exports.post_event_archive = (req, res) ->
+event_modification_endpoint = (new_state, req, res) ->
   req.assert('id', 'Must provide an event id.').isInt()
   validation_errors = req.validationErrors()
   fail = (errors...) ->
@@ -91,9 +91,17 @@ exports.post_event_archive = (req, res) ->
   Event.find(req.body.id).success (event) ->
     if event.UserId != req.user.id
       return fail(msg: "You are not authorized to edit that event.")
-    event.state = 'archived'
+    event.state = new_state
     return event.save()
   .success () ->
     res.send {status: 'ok'}
   .failure fail
 
+exports.post_event_archive = (req, res) ->
+  event_modification_endpoint 'archived', req, res
+
+exports.post_event_restore = (req, res) ->
+  event_modification_endpoint 'active', req, res
+
+exports.post_event_delete = (req, res) ->
+  event_modification_endpoint 'deleted', req, res

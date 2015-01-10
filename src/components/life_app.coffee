@@ -169,13 +169,13 @@ LifeApp = React.createClass
     new_state.in_edit = true
     @setState new_state
 
-  archiveEvent: (e) ->
+  grabEventIdAndRemove: (endpoint, e) ->
     id = $(e.target).data('event_id')
-    $.post '/event/archive', {
+    $.post endpoint, {
       id
     }, (body) =>
       if body.status != 'ok'
-        console.error("Failed to archive event")
+        console.error("Bad call to endpoint")
       index = -1
       events = (x for x in @state.events)
       for event, i in events
@@ -183,12 +183,21 @@ LifeApp = React.createClass
           index = i
           break
       if index == -1
-        throw Error("Couldn't find event entering edit mode.")
+        throw Error("Couldn't find event that was modified")
 
       # Remove the event
       events.splice(index, 1)
       new_state = @getNewObjects events
       @setState new_state
+
+  archiveEvent: (e) ->
+    @grabEventIdAndRemove '/event/archive', e
+
+  restoreEvent: (e) ->
+    @grabEventIdAndRemove '/event/restore', e
+
+  deleteEvent: (e) ->
+    @grabEventIdAndRemove '/event/delete', e
 
   sortEvents: (events) ->
     # Sort all the events from oldest to newest
@@ -226,13 +235,17 @@ LifeApp = React.createClass
     return {events, headers: header_list}
 
   createEventTileObject: (event) ->
-    object = {key: event.key, event, id: "event_" + event.id}
+    object = {key: event.key, event, id: "event_" + event.id, type: event.state}
     if event.edit_mode
       object.submit_handler = @submitHandler
       object.cancel_handler = @cancelHandler
     else
-      object.edit_handler = @beginEdit
-      object.archive_handler = @archiveEvent
+      if event.state == 'active'
+        object.edit_handler = @beginEdit
+        object.archive_handler = @archiveEvent
+      else if event.state == 'archived'
+        object.restoreHandler = @restoreEvent
+        object.deleteHandler = @deleteEvent
     return object
 
   getAllTimelineObjects: (events, headers, view_time_range) ->
@@ -475,6 +488,7 @@ EventTile = React.createClass
 
     initial = {
       event: props.event
+      type: props.type
       show_all_detail: true
     }
     initial.to_display = @prepareEvent(props.event, true)
@@ -502,11 +516,14 @@ EventTile = React.createClass
     # Trigger the render
     @setState {to_display, show_all_detail}
 
-  handleExpand: (e) ->
-    @switchDetail()
-
   handleArchive: (e) ->
     @props.archive_handler e
+
+  handleRestore: (e) ->
+    @props.restoreHandler e
+
+  handleDelete: (e) ->
+    @props.deleteHandler e
 
   handleBeginEdit: (e) ->
     @props.edit_handler e
@@ -518,30 +535,127 @@ EventTile = React.createClass
         submit_handler: @props.submit_handler, cancel_handler: @props.cancel_handler
       })
     else
-      if @state.show_all_detail
-        expand_class = "mdi-navigation-expand-less"
-      else
-        expand_class = "mdi-navigation-expand-more"
+      tileOptions =
+        handleEventExpand: @switchDetail
+        handleArchive: @handleArchive
+        handleRestore: @handleRestore
+        handleDelete: @handleDelete
+        handleBeginEdit: @handleBeginEdit
+        eventShowAll: @state.show_all_detail
+        type: @props.type
+        eventId: @state.event.id
 
       return React.createElement("div", {className: "well", id: @props.id},
         React.createElement("div", {key: "arrow", className: "event-arrow"})
-        React.createElement("div", {key: "buttons", className: "event-header"},
-          React.createElement("i", {
-            className: "mdi-content-archive", 'data-event_id': @state.event.id,
-            onClick: @handleArchive
-          })
-          React.createElement("i", {
-            className: "mdi-content-create", 'data-event_id': @state.event.id,
-            onClick: @handleBeginEdit
-          })
-          React.createElement("i", {className: expand_class, onClick: @handleExpand})
+        React.createElement("div", {key: "date", className: "event-date"},
+          @state.to_display.date,
+          React.createElement(EventTileOptions, tileOptions)
         )
-        React.createElement("div", {key: "date", className: "event-date"}, @state.to_display.date)
         React.createElement("div", {
           className: "event-detail", key: "detail"
           dangerouslySetInnerHTML: {__html: @state.to_display.detail}
         })
       )
+
+EventTileOptions = React.createClass
+  displayName: "EventTileOptions"
+
+  getInitialState: () ->
+    return {
+      optionsExpanded: false
+    }
+
+  handleExpand: () ->
+    @setState optionsExpanded: not @state.optionsExpanded
+
+  handleEventExpand: (e) ->
+    @props.handleEventExpand e
+
+  handleArchive: (e) ->
+    if @props.type != 'active'
+      throw Error "Can't archive non-active event"
+    @props.handleArchive e
+
+  handleRestore: (e) ->
+    if @props.type != 'archived'
+      throw Error "Can't restore non-archived event"
+    @props.handleRestore e
+
+  handleDelete: (e) ->
+    if @props.type != 'archived'
+      throw Error "Can't delete non-archived event"
+    @props.handleDelete e
+
+  handleBeginEdit: (e) ->
+    if @props.type != 'active'
+      throw Error "Can't edit non-active event"
+    @props.handleBeginEdit e
+
+  getOptionsExpandClass: () ->
+    if @state.optionsExpanded
+      return "mdi-navigation-chevron-right"
+    else
+      return "mdi-navigation-more-horiz"
+
+  getEventExpandClass: () ->
+    if @props.eventShowAll
+      return "mdi-navigation-expand-less"
+    else
+      return "mdi-navigation-expand-more"
+
+  renderCollapsed: () ->
+    optionsClass = @getOptionsExpandClass()
+
+    return React.createElement("div", className: "event-header",
+      React.createElement("i", {
+        className: optionsClass, onClick: @handleExpand
+      })
+    )
+
+  renderExpanded: (type) ->
+    eventExpandClass = @getEventExpandClass()
+    optionsClass = @getOptionsExpandClass()
+    if type == 'active'
+      buttons = [
+        React.createElement("i", {
+          key: "archive"
+          className: "mdi-content-archive", 'data-event_id': @props.eventId,
+          onClick: @handleArchive
+        })
+        React.createElement("i", {
+          key: "edit"
+          className: "mdi-content-create", 'data-event_id': @props.eventId,
+          onClick: @handleBeginEdit
+        })
+      ]
+    else if type == 'archived'
+      buttons = [
+        React.createElement("i", {
+          key: "restore"
+          className: "mdi-content-reply", 'data-event_id': @props.eventId,
+          onClick: @handleRestore
+        })
+        React.createElement("i", {
+          key: "delete"
+          className: "mdi-content-clear", 'data-event_id': @props.eventId,
+          onClick: @handleDelete
+        })
+      ]
+    else
+      throw Error "Unknown event type"
+
+    buttons = buttons.concat [
+      React.createElement("i",
+        {key: "ee", className: eventExpandClass, onClick: @handleEventExpand})
+      React.createElement("i", {key: "oe", className: optionsClass, onClick: @handleExpand})
+    ]
+
+    return React.createElement("div", {key: "buttons", className: "event-header"}, buttons)
+
+  render: () ->
+    if not @state.optionsExpanded
+      return @renderCollapsed()
+    return @renderExpanded @props.type
 
 TimelineBar = React.createClass
   displayName: 'TimelineBar'

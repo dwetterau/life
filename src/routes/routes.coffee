@@ -12,6 +12,7 @@ dropbox_controller = require '../controllers/dropbox_controller'
 
 # GET home page
 router.get '/', index_controller.get_index
+router.get '/archive', passport_config.isAuthenticated, index_controller.get_archive
 
 # User routes
 router.get '/user/create', user_controller.get_user_create
@@ -27,6 +28,8 @@ router.get '/event/add', passport_config.isAuthenticated, event_controller.get_e
 router.post '/event/add', passport_config.isAuthenticated, event_controller.post_event_add
 router.post '/event/update', passport_config.isAuthenticated, event_controller.post_event_update
 router.post '/event/archive', passport_config.isAuthenticated, event_controller.post_event_archive
+router.post '/event/restore', passport_config.isAuthenticated, event_controller.post_event_restore
+router.post '/event/delete', passport_config.isAuthenticated, event_controller.post_event_delete
 
 # Integration routes
 router.get '/integrations', passport_config.isAuthenticated, integration_controller.get_index

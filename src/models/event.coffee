@@ -24,5 +24,6 @@ module.exports = (sequelize, DataTypes) ->
         id: this.id
         detail: this.detail
         date: this.date
+        state: this.state
       }
   return Event
