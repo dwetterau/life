@@ -435,15 +435,15 @@ AppNavigation = React.createClass
       React.createElement("ul", className: "dropdown-menu small-menu",
         React.createElement("li", null,
           React.createElement("a",
-            {href, onClick: @switchView, 'data-view': 'day'}, 'Today')
+            {href, onClick: @switchView, 'data-view': 'day'}, 'One day')
         )
         React.createElement("li", null,
           React.createElement("a",
-            {href, onClick: @switchView, 'data-view': 'week'}, 'This week')
+            {href, onClick: @switchView, 'data-view': 'week'}, 'One week')
         )
         React.createElement("li", null,
           React.createElement("a",
-            {href, onClick: @switchView, 'data-view': 'month'}, 'This month')
+            {href, onClick: @switchView, 'data-view': 'month'}, 'One month')
         )
       )
     )
@@ -565,8 +565,11 @@ EventTileOptions = React.createClass
       optionsExpanded: false
     }
 
-  handleExpand: () ->
+  handleExpand: (e) ->
     @setState optionsExpanded: not @state.optionsExpanded
+    e.preventDefault()
+    e.stopPropagation()
+    return false
 
   handleEventExpand: (e) ->
     @props.handleEventExpand e
@@ -592,10 +595,7 @@ EventTileOptions = React.createClass
     @props.handleBeginEdit e
 
   getOptionsExpandClass: () ->
-    if @state.optionsExpanded
-      return "mdi-navigation-chevron-right"
-    else
-      return "mdi-navigation-more-horiz"
+    return "mdi-navigation-more-horiz"
 
   getEventExpandClass: () ->
     if @props.eventShowAll

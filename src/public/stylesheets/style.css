@@ -89,7 +89,10 @@ div.event-header {
     cursor: pointer;
     font-size: 14pt;
     min-height: 20px;
-    min-width: 20px
+    min-width: 20px;
+    position: absolute;
+    right: 30px;
+    display: inline-block;
 }
 
 .event-header i {
