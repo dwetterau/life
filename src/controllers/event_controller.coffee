@@ -44,10 +44,12 @@ exports.post_event_add = (req, res) ->
     UserId: req.user.id
   }
   labels = req.body.labels
+  new_event.encrypt()
   new_event.save().success () ->
     # Create label objects for all of the labels
     return Label.bulkCreate get_new_labels(labels, req.user.id, new_event.id)
   .success (new_labels) ->
+    new_event.decrypt()
     res.send {status: 'ok', new_event: to_json_with_labels(new_event, new_labels)}
   .failure fail
 
@@ -69,6 +71,7 @@ exports.post_event_update = (req, res)  ->
 
     event.date = req.body.date
     event.detail = req.body.detail
+    event.encrypt()
     updated_event = event
     return event.save()
   .success () ->
@@ -77,6 +80,7 @@ exports.post_event_update = (req, res)  ->
   .success () ->
     return Label.bulkCreate get_new_labels(labels, req.user.id, updated_event.id)
   .success (new_labels) ->
+    updated_event.decrypt()
     res.send {status: 'ok', new_event: to_json_with_labels(updated_event, new_labels)}
   .failure fail
 

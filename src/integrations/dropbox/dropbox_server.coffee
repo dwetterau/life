@@ -138,6 +138,7 @@ listenForPhotos = (client, integration) ->
   createOrUpdateEvent = (callback) ->
     # Step 6
     saveEvent = (event) ->
+      event.encrypt()
       event.save().then () ->
         lastUpdatedEvent.id = event.id
         lastUpdatedEvent.time = moment()
@@ -166,6 +167,9 @@ listenForPhotos = (client, integration) ->
       Event.find({where: {id: lastUpdatedEvent.id}, include: [Image]}).then (event) ->
         if event.state != 'active'
           return makeNewEvent()
+        if moment(event.updatedAt).isAfter(lastUpdatedEvent.time)
+          return makeNewEvent()
+
         existingImages = (image.to_json() for image in event.Images)
         getEventDetail existingImages, (error, detail) ->
           if error
