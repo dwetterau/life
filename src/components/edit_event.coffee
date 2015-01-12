@@ -34,6 +34,9 @@ EditEvent = React.createClass
     array.sort()
     return array.join(" ")
 
+  handleSubmit: () ->
+    @props.submit_handler @state.event, @state.action
+
   render: () ->
     return React.createElement("div", {className: 'well'},
       React.createElement("div",
@@ -41,11 +44,6 @@ EditEvent = React.createClass
       )
       React.createElement("form", {
         id: "event_form",
-        action: @state.action
-        method: "POST"
-        'data-event_key': @state.event.key
-        'data-event_id': @state.event.id
-        onSubmit: @props.submit_handler
       },
         # Elements for the time and date selection
         React.createElement("div", {className: "form-group form-group-material-indigo"},
@@ -56,28 +54,28 @@ EditEvent = React.createClass
         React.createElement("div", {className: "form-group form-group-material-indigo"},
           React.createElement(Editor, {detail: @state.event.detail})
         )
+      )
 
-        # Elements for the labels
-        React.createElement("div", {className: "form-group"},
-          React.createElement("input", {
-            type: "text"
-            name: "labels"
-            id: "labels"
-            placeholder: "Enter labels..."
-            defaultValue: @convertToString(@state.event.labels)
-          })
+      # Elements for the labels
+      React.createElement("div", {className: "form-group"},
+        React.createElement("input", {
+          type: "text"
+          name: "labels"
+          id: "labels"
+          placeholder: "Enter labels..."
+          defaultValue: @convertToString(@state.event.labels)
+        })
+      )
+
+      # Elements for the submit button
+      React.createElement("div", {className: "form-group form-group-material-indigo text-right"},
+        React.createElement("button",
+          {className: "btn btn-danger submit-button", onClick: @props.cancel_handler},
+          React.createElement("span", null, "Cancel")
         )
-
-        # Elements for the submit button
-        React.createElement("div", {className: "form-group form-group-material-indigo text-right"},
-          React.createElement("button",
-            {className: "btn btn-danger submit-button", onClick: @props.cancel_handler},
-            React.createElement("span", {className: "ion-person-add"}, "Cancel")
-          )
-          React.createElement("button",
-            {className: "btn btn-success submit-button", type: "submit"},
-            React.createElement("span", {className: "ion-person-add"}, "Done")
-          )
+        React.createElement("button",
+          {className: "btn btn-success submit-button", onClick: @handleSubmit},
+          React.createElement("span", null, "Done")
         )
       )
     )

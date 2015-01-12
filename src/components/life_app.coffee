@@ -76,10 +76,9 @@ LifeApp = React.createClass
     }
     @setState new_state
 
-  submitHandler: (e) ->
-    key = $(e.target).data('event_key')
-    event_id = $(e.target).data('event_id')
-    url = e.target.action
+  submitHandler: (e, url) ->
+    key =  e.key
+    event_id = e.id
     # Note: this should be the only thing left that relies on there only being one event
     # in edit mode at a time.
     $.post url, {
@@ -113,8 +112,6 @@ LifeApp = React.createClass
         new_state.temp_event = null
 
         @setState new_state
-
-    e.preventDefault()
 
   cancelHandler: (e) ->
     # If the event was a temp event, just delete it
