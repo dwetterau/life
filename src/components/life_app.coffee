@@ -21,7 +21,7 @@ LifeApp = React.createClass
     view_type = "day"
     base_moment = moment()
     {objects, past_events, future_events, labels} =
-      @getAllTimelineObjects(events, headers, @getViewTimeRange(view_type, base_moment))
+      @getAllTimelineObjects(events, headers, @getViewTimeRange(view_type, base_moment), [])
 
     return {
       events
@@ -34,13 +34,14 @@ LifeApp = React.createClass
       past_events
       future_events
       labels
+      labelFilter: []
     }
 
   componentWillReceiveProps: (new_props, old_props) ->
     @setState @getInitialState(new_props)
 
   componentDidUpdate: () ->
-    if $("form#event_form").length and @inlineEditing(false)
+    if $("form#event_form").length
       @scrollToEdit()
 
   scrollToEdit: () ->
@@ -253,18 +254,33 @@ LifeApp = React.createClass
         object.deleteHandler = @deleteEvent
     return object
 
-  getAllTimelineObjects: (events, headers, view_time_range) ->
+  getAllTimelineObjects: (events, headers, view_time_range, labelFilter) ->
     if not view_time_range?
       view_time_range = @getViewTimeRange @state.view_type
+    if not labelFilter?
+      labelFilter = @state.labelFilter
 
     # Compute all the labels
     labels = {}
     for event in events
+      event.labelLookupMap = {}
       for label in event.labels
+        event.labelLookupMap[label] = true
         if label of labels
           labels[label].push event.id
         else
           labels[label] = [event.id]
+
+    # Returns true if the event is filtered out because it doesn't have one of the
+    # labels in the labelFilter
+    filtered = (event) ->
+      for label in labelFilter
+        if label not of event.labelLookupMap
+          return true
+      return false
+
+    # Note that it's okay to change events here because we don't output it
+    events = (e for e in events when not filtered(e))
 
     # Reads the events and headers off of state, orders them, and returns them
     objects = []
@@ -317,6 +333,14 @@ LifeApp = React.createClass
     # Update the objects to fit in this range
     new_state = @getAllTimelineObjects(@state.events, @state.headers)
     new_state.base_moment = m
+    @setState new_state
+
+  filterTokens: (filterTokens) ->
+    if @inlineEditing(true)
+      return
+    filterTokens = filterTokens.split(' ')
+    new_state = @getAllTimelineObjects @state.events, @state.headers, null, filterTokens
+    new_state.labelFilter = filterTokens
     @setState new_state
 
   getViewTimeRange: (view_type, base_moment) ->
@@ -381,6 +405,8 @@ LifeApp = React.createClass
       addEvent: @addEvent
       past_events: @state.past_events
       future_events: @state.future_events
+      labels: @state.labels
+      filterTokens: @filterTokens
 
     app_array = [React.createElement(AppNavigation, app_nav_props())]
     if @state.temp_event?
@@ -412,6 +438,9 @@ AppNavigation = React.createClass
 
   goToFuture: (e) ->
     @props.changeTimeRange false
+
+  componentDidMount: () ->
+    @initializeFilterField()
 
   getNavigationButtons: () ->
     href = 'javascript:void(0)'
@@ -470,22 +499,66 @@ AppNavigation = React.createClass
         "a", {href, className: "btn btn-success small-btn", onClick: @props.addEvent}, 'Add Event')
     )
 
+  getNewFilterTokens: (e) ->
+    @props.filterTokens $("#label-filter").tokenfield('getTokensList')
+
+  initializeFilterField: () ->
+    getLabelList = () =>
+      ({value: l} for l of @props.labels)
+
+    engine = new Bloodhound({
+      local: getLabelList()
+      datumTokenizer: (d) ->
+        return Bloodhound.tokenizers.whitespace(d.value)
+      queryTokenizer: Bloodhound.tokenizers.whitespace
+    })
+    engine.initialize()
+
+    $("#label-filter").tokenfield({
+      delay: 100
+      delimiter: " "
+      createTokensOnBlur: true
+      typeahead: [null, {source: engine.ttAdapter()}]
+    }).on('tokenfield:createtoken', (e) ->
+      e.attrs.value = e.attrs.value.toLowerCase()
+    ).on('tokenfield:createdtoken', @getNewFilterTokens
+    ).on('tokenfield:removedtoken', @getNewFilterTokens)
+
+  getLabelFilterField: () ->
+    React.createElement("div", {key: "label-filter"},
+      React.createElement("input", {
+        type: "text", id: "label-filter", placeholder: "Filter by labels..."
+      })
+    )
+
   render: () ->
     navigation_buttons = @getNavigationButtons()
+    filterField = @getLabelFilterField()
     right_side = [navigation_buttons]
 
     left_side = [@getAddEventButton()]
     if @props.top
       left_side.push @getViewChangeButton()
 
-    # View changes
-    return React.createElement("div", {className: "col-sm-offset-2 col-sm-8"},
-      React.createElement("div", {className: "nav-buttons-left-side"}
+    allButtons = []
+    if @props.top
+      allButtons.push(
+        React.createElement("div", {key: "ff-wrapper", className: "well well-sm filter-field-well"}
+          filterField
+        )
+      )
+    allButtons = allButtons.concat [
+      React.createElement("div", {key: "ls-buttons", className: "nav-buttons-left-side"}
         left_side
       )
-      React.createElement("div", {className: "nav-buttons-right-side"},
+      React.createElement("div", {key: "rs-buttons", className: "nav-buttons-right-side"},
         right_side
       )
+    ]
+
+    # View changes
+    return React.createElement("div", {className: "col-sm-offset-2 col-sm-8 app-navigation"},
+      allButtons
     )
 
 Header = React.createClass

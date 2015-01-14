@@ -12,6 +12,7 @@ body {
     padding-left: 0;
     padding-right: 0;
     margin-bottom: 75px;
+    overflow-x: hidden;
 }
 
 a {
@@ -174,4 +175,19 @@ div.nav-buttons-right-side {
     background-color: #007ee5;
     border-radius: 3px;
     border: 1px solid #eceded;
+}
+
+.app-navigation {
+    margin-top: 10px;
+}
+
+.well.well-sm.filter-field-well {
+    margin-bottom: 0;
+}
+
+.filter-field-well .tokenfield {
+    min-height: 26px;
+    box-shadow: none;
+    border-bottom: 1px solid #757575;
+    border-radius: 0;
 }
