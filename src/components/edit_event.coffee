@@ -19,12 +19,22 @@ EditEvent = React.createClass
   componentWillReceiveProps: (new_props, old_props) ->
     @setState @getInitialState(new_props)
 
+  getLabelList: () ->
+    ({value: l} for l of @props.labels)
+
   componentDidMount: () ->
+    engine = new Bloodhound({
+      local: @getLabelList()
+      datumTokenizer: (d) ->
+        return Bloodhound.tokenizers.whitespace(d.value)
+      queryTokenizer: Bloodhound.tokenizers.whitespace
+    })
+    engine.initialize()
     $("input#labels").tokenfield({
-      # TODO: Add stuff to autocomplete (based on existing labels)
       delay: 100
       delimiter: " "
       createTokensOnBlur: true
+      typeahead: [null, {source: engine.ttAdapter()}]
     }).on 'tokenfield:createtoken', (e) ->
       e.attrs.value = e.attrs.value.toLowerCase()
 

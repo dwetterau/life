@@ -20,7 +20,7 @@ LifeApp = React.createClass
     {events, headers} = @processEvents(props.events)
     view_type = "day"
     base_moment = moment()
-    {objects, past_events, future_events} =
+    {objects, past_events, future_events, labels} =
       @getAllTimelineObjects(events, headers, @getViewTimeRange(view_type, base_moment))
 
     return {
@@ -33,13 +33,14 @@ LifeApp = React.createClass
       base_moment
       past_events
       future_events
+      labels
     }
 
   componentWillReceiveProps: (new_props, old_props) ->
     @setState @getInitialState(new_props)
 
   componentDidUpdate: () ->
-    if $("form#event_form").length
+    if $("form#event_form").length and @inlineEditing(false)
       @scrollToEdit()
 
   scrollToEdit: () ->
@@ -94,7 +95,7 @@ LifeApp = React.createClass
         @initializeEvents([new_event])
         events = @state.events
 
-        if @inlineEditing()
+        if @inlineEditing(false)
           # If we were editing inline, remove the old event
           # Determine the index of the edit event
           index = -1
@@ -232,7 +233,14 @@ LifeApp = React.createClass
     return {events, headers: header_list}
 
   createEventTileObject: (event) ->
-    object = {key: event.key, event, id: "event_" + event.id, type: event.state}
+    object = {
+      key: event.key
+      event
+      id: "event_" + event.id
+      type: event.state
+      labels: @state.labels
+    }
+
     if event.edit_mode
       object.submit_handler = @submitHandler
       object.cancel_handler = @cancelHandler
@@ -270,15 +278,23 @@ LifeApp = React.createClass
     if i < events.length
       future_events = true
 
-    return {objects, past_events, future_events}
+    labels = {}
+    for event in events
+      for label in event.labels
+        if label of labels
+          labels[label].push event.id
+        else
+          labels[label] = [event.id]
+
+    return {objects, past_events, future_events, labels}
 
   # Returns if we are editing an event inline or not. If so, we shouldn't allow view changes.
-  # TODO: Make this display a warning if it returns false.
-  inlineEditing: () ->
+  # TODO: Make this display a warning if it returns false and displayError is true.
+  inlineEditing: (displayError) ->
     return @state.in_edit and not @state.temp_event?
 
   switchView: (view_type) ->
-    if @inlineEditing()
+    if @inlineEditing(true)
       return
     if view_type == @state.view_type
       return
@@ -288,7 +304,7 @@ LifeApp = React.createClass
     @setState new_state
 
   changeTimeRange: (to_past) ->
-    if @inlineEditing()
+    if @inlineEditing(true)
       return
     m = @state.base_moment
     if to_past
@@ -528,7 +544,7 @@ EventTile = React.createClass
   render: () ->
     if @state.event.edit_mode
       return React.createElement(EditEvent, {
-        id: @props.id, event: @state.event,
+        id: @props.id, event: @state.event, labels: @props.labels,
         submit_handler: @props.submit_handler, cancel_handler: @props.cancel_handler
       })
     else
