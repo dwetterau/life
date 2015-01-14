@@ -71,7 +71,7 @@ LifeApp = React.createClass
       temp_event: true
     }
     new_state = {
-      temp_event: @createEventTileObject(event)
+      temp_event: @createEventTileObject(event, @state.labels)
       counter: @state.counter + 1
       in_edit: true
     }
@@ -232,13 +232,13 @@ LifeApp = React.createClass
         headers[event.rendered_date] = true
     return {events, headers: header_list}
 
-  createEventTileObject: (event) ->
+  createEventTileObject: (event, allLabels) ->
     object = {
       key: event.key
       event
       id: "event_" + event.id
       type: event.state
-      labels: @state.labels
+      labels: allLabels
     }
 
     if event.edit_mode
@@ -256,6 +256,16 @@ LifeApp = React.createClass
   getAllTimelineObjects: (events, headers, view_time_range) ->
     if not view_time_range?
       view_time_range = @getViewTimeRange @state.view_type
+
+    # Compute all the labels
+    labels = {}
+    for event in events
+      for label in event.labels
+        if label of labels
+          labels[label].push event.id
+        else
+          labels[label] = [event.id]
+
     # Reads the events and headers off of state, orders them, and returns them
     objects = []
     i = 0
@@ -272,19 +282,11 @@ LifeApp = React.createClass
         break
       objects.push {key: header.key, header, id: "header_" + j}
       while i < events.length and events[i].rendered_date == header.date
-        objects.push @createEventTileObject(events[i])
+        objects.push @createEventTileObject(events[i], labels)
         i++
 
     if i < events.length
       future_events = true
-
-    labels = {}
-    for event in events
-      for label in event.labels
-        if label of labels
-          labels[label].push event.id
-        else
-          labels[label] = [event.id]
 
     return {objects, past_events, future_events, labels}
 
