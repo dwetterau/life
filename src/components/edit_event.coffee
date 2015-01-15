@@ -1,7 +1,7 @@
 React = require 'react'
 moment = require 'moment'
 {Selector} = require './time_selector'
-{Editor} = require './quill_editor'
+{Editor} = require './editor'
 
 EditEvent = React.createClass
   displayName: 'EditEvent'

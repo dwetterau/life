@@ -195,3 +195,19 @@ div.nav-buttons-right-side {
 .text-italic {
     font-style: italic;
 }
+
+.btn.btn-default.ed-btn {
+    color: #000;
+}
+
+.btn.modal-submit-btn {
+    margin: 0 .5em .5em 0;
+}
+
+#editor {
+  border: 0;
+  box-shadow: none;
+  border-bottom: 1px solid #757575;
+  border-radius: 0;
+  width: 100%;
+}

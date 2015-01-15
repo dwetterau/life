@@ -88,7 +88,7 @@ LifeApp = React.createClass
     $.post url, {
       id: event_id
       date: $('#date').val()
-      detail: $('#detail').val()
+      detail: $('#editor').val()
       labels: $('#labels').val()
     },
     (body) =>
