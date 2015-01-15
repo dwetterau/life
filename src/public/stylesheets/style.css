@@ -1,14 +1,9 @@
-body {
-  padding: 50px;
-}
-
 html {
     position: relative;
     min-height: 100%;
 }
 
 body {
-    padding-top: 60px;
     padding-left: 0;
     padding-right: 0;
     margin-bottom: 75px;
@@ -210,4 +205,8 @@ div.nav-buttons-right-side {
   border-bottom: 1px solid #757575;
   border-radius: 0;
   width: 100%;
+}
+
+.container.welcome-container {
+    margin-top: 30px;
 }
