@@ -17,11 +17,13 @@ LifeApp = React.createClass
     props = props || @props
 
     @initializeEvents(props.events)
-    {events, headers} = @processEvents(props.events)
+    {events, headers, labels} = @processEvents(props.events)
     view_type = "day"
     base_moment = moment()
-    {objects, past_events, future_events, labels} =
-      @getAllTimelineObjects(events, headers, @getViewTimeRange(view_type, base_moment), [])
+    {objects, past_events, future_events} =
+      @getAllTimelineObjects(
+        events, headers, labels, @getViewTimeRange(view_type, base_moment), []
+      )
 
     return {
       events
@@ -51,8 +53,8 @@ LifeApp = React.createClass
     }, 1000);
 
   getNewObjects: (events) ->
-    {events, headers} = @processEvents events
-    new_state = @getAllTimelineObjects events, headers
+    {events, headers, labels} = @processEvents events
+    new_state = @getAllTimelineObjects events, headers, labels
     new_state.events = events
     new_state.headers = headers
     return new_state
@@ -221,6 +223,7 @@ LifeApp = React.createClass
 
     events = @sortEvents events
 
+    labels = {}
     headers = {}
     header_list = []
     for event in events
@@ -231,7 +234,17 @@ LifeApp = React.createClass
           key: "header_" + event.rendered_date
         }
         headers[event.rendered_date] = true
-    return {events, headers: header_list}
+
+      event.labelLookupMap = {}
+      # Compute all the labels
+      for label in event.labels
+        event.labelLookupMap[label] = true
+        if label of labels
+          labels[label].push event.id
+        else
+          labels[label] = [event.id]
+
+    return {events, headers: header_list, labels}
 
   createEventTileObject: (event, allLabels) ->
     object = {
@@ -254,22 +267,11 @@ LifeApp = React.createClass
         object.deleteHandler = @deleteEvent
     return object
 
-  getAllTimelineObjects: (events, headers, view_time_range, labelFilter) ->
+  getAllTimelineObjects: (events, headers, labels, view_time_range, labelFilter) ->
     if not view_time_range?
       view_time_range = @getViewTimeRange @state.view_type
     if not labelFilter?
       labelFilter = @state.labelFilter
-
-    # Compute all the labels
-    labels = {}
-    for event in events
-      event.labelLookupMap = {}
-      for label in event.labels
-        event.labelLookupMap[label] = true
-        if label of labels
-          labels[label].push event.id
-        else
-          labels[label] = [event.id]
 
     # Returns true if the event is filtered out because it doesn't have one of the
     # labels in the labelFilter
@@ -300,11 +302,21 @@ LifeApp = React.createClass
       while i < events.length and events[i].rendered_date == header.date
         objects.push @createEventTileObject(events[i], labels)
         i++
+      # If the previous thing in objects is a header, the events have been filtered out
+      if objects[objects.length - 1].header?
+        objects.push @getAllObjectsFilteredElement(header.key + '-all-filtered')
 
     if i < events.length
       future_events = true
 
-    return {objects, past_events, future_events, labels}
+    return {objects, past_events, future_events}
+
+  getAllObjectsFilteredElement: (key) ->
+    return {
+      element: React.createElement("div", {className: "text-center text-italic", key},
+        "You have filtered out all your events for this day."
+      )
+    }
 
   # Returns if we are editing an event inline or not. If so, we shouldn't allow view changes.
   # TODO: Make this display a warning if it returns false and displayError is true.
@@ -317,7 +329,9 @@ LifeApp = React.createClass
     if view_type == @state.view_type
       return
     view_time_range = @getViewTimeRange(view_type)
-    new_state = @getAllTimelineObjects @state.events, @state.headers, view_time_range
+    new_state = @getAllTimelineObjects(
+      @state.events, @state.headers, @state.labels, view_time_range
+    )
     new_state.view_type = view_type
     @setState new_state
 
@@ -331,15 +345,20 @@ LifeApp = React.createClass
       m.add 1, @state.view_type
 
     # Update the objects to fit in this range
-    new_state = @getAllTimelineObjects(@state.events, @state.headers)
+    new_state = @getAllTimelineObjects(@state.events, @state.headers, @state.labels)
     new_state.base_moment = m
     @setState new_state
 
   filterTokens: (filterTokens) ->
     if @inlineEditing(true)
       return
-    filterTokens = filterTokens.split(' ')
-    new_state = @getAllTimelineObjects @state.events, @state.headers, null, filterTokens
+    if filterTokens is ''
+      filterTokens = []
+    else
+      filterTokens = filterTokens.split(' ')
+    new_state = @getAllTimelineObjects(
+      @state.events, @state.headers, @state.labels, null, filterTokens
+    )
     new_state.labelFilter = filterTokens
     @setState new_state
 
@@ -383,19 +402,25 @@ LifeApp = React.createClass
 
   render: () ->
     timeline_list = []
+    hasEvent = false
     for object in @state.objects
-      if object.header?
+      if object.element?
+        timeline_list.push object.element
+      else if object.header?
         timeline_list.push React.createElement(Header, object)
       else if object.event?
+        hasEvent = true
         timeline_list.push React.createElement(EventTile, object)
 
     if timeline_list.length
       timeline = [
-        React.createElement(TimelineBar, {key: "timeline-bar"})
         React.createElement("div", {key: "timeline-content"}, timeline_list)
       ]
     else
       timeline = @getNoObjectsHeader()
+
+    if hasEvent
+      timeline.push React.createElement(TimelineBar, {key: "timeline-bar"})
 
     app_nav_props = () =>
       key: "top_app_nav"
