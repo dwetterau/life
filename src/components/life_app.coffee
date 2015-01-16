@@ -43,7 +43,7 @@ LifeApp = React.createClass
     @setState @getInitialState(new_props)
 
   componentDidUpdate: () ->
-    if $("form#event_form").length
+    if @state.in_edit
       @scrollToEdit()
 
   scrollToEdit: () ->
@@ -62,6 +62,7 @@ LifeApp = React.createClass
   addEvent: () ->
     # Don't add another if we are editing something
     if @state.in_edit
+      @throwAlreadyEditingError()
       return
     new_date = moment()
     # Make the new event
@@ -153,6 +154,7 @@ LifeApp = React.createClass
 
   beginEdit: (e) ->
     if @state.in_edit
+      @throwAlreadyEditingError()
       return
     id = $(e.target).data('event_id')
     index = -1
@@ -318,10 +320,17 @@ LifeApp = React.createClass
       )
     }
 
+  throwAlreadyEditingError: () ->
+    $.snackbar
+      content: "Finish editing your event first!"
+      timeout: 3000
+
   # Returns if we are editing an event inline or not. If so, we shouldn't allow view changes.
-  # TODO: Make this display a warning if it returns false and displayError is true.
   inlineEditing: (displayError) ->
-    return @state.in_edit and not @state.temp_event?
+    inlineEditing = @state.in_edit and not @state.temp_event?
+    if inlineEditing and displayError
+      @throwAlreadyEditingError()
+    return inlineEditing
 
   switchView: (view_type) ->
     if @inlineEditing(true)

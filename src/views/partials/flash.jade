@@ -1,16 +1,19 @@
 .alert-container
   if messages.errors
-    .alert.alert-danger.alert-dismissable
-      button.close(type='button', data-dismiss='alert') &times;
-      for error in messages.errors
-        .text-center= error.msg
+    for error in messages.errors
+      script.
+        setTimeout(function() {
+          $.snackbar({content: "!{error.msg}", timeout: 3000});
+        }, 300);
   if messages.info
-    .alert.alert-info.alert-dismissable
-      button.close(type='button', data-dismiss='alert') &times;
-      for info in messages.info
-        .text-center= info.msg
+    for info in messages.info
+      script.
+        setTimeout(function() {
+          $.snackbar({content: "!{info.msg}", timeout: 3000});
+        }, 300);
   if messages.success
-    .alert.alert-success.alert-dismissable
-      button.close(type='button', data-dismiss='alert') &times;
-      for success in messages.success
-        .text-center= success.msg
+    for success in messages.success
+      script.
+        setTimeout(function() {
+          $.snackbar({content: "!{success.msg}", timeout: 3000});
+        }, 300);
