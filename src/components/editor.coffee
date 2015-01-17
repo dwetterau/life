@@ -159,7 +159,7 @@ Editor = React.createClass
         link: @getLinkTemplate()
         image: @getImageTemplate()
 
-    $editor.html(@state.detail)
+    $editor.data("wysihtml5").editor.composer.setValue @state.detail
 
   render: () ->
     return React.createElement("textarea", {id: "editor"})
