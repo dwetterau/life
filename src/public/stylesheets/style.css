@@ -57,16 +57,6 @@ div#timeline-bar {
     );
 }
 
-div.event-arrow {
-    position: absolute;
-    width: 15px;
-    height: 15px;
-    left: 8px;
-    transform: rotate(45deg);
-    background-color: #FFF;
-    box-shadow: -2.5px 3px 5px rgba(0,0,0,.16);
-}
-
 div.event-header {
     color: #888888;
     float: right;

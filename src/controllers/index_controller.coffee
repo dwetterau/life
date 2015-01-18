@@ -18,32 +18,39 @@ getEventsWithState = (targetState, user, callback) ->
         event.labels = label_map[event.id]
       else
         event.labels = []
-    callback null, JSON.stringify(events)
+    callback null, events
   .catch (err) ->
     callback err
 
 exports.get_index = (req, res) ->
-  render_dict = {
+  renderDict = {
     user: req.user
   }
   if req.user
-    getEventsWithState 'active', req.user, (error, state) ->
+    getEventsWithState 'active', req.user, (error, events) ->
       if error
         console.log error
-      render_dict.title = 'Timeline'
-      render_dict.state = state
-      res.render 'index', render_dict
+      renderDict.title = 'Thoughts'
+      renderDict.state = JSON.stringify {
+        events
+        appType: 'active'
+      }
+      res.render 'index', renderDict
   else
-    render_dict.title = 'Welcome'
-    res.render 'index', render_dict
+    renderDict.title = 'Welcome'
+    res.render 'index', renderDict
 
 exports.get_archive = (req, res) ->
   renderDict = {
     user: req.user
     title: 'Archive'
   }
-  getEventsWithState 'archived', req.user, (error, state) ->
+  getEventsWithState 'archived', req.user, (error, events) ->
     if error
       console.log error
-    renderDict.state = state
+    renderDict.state = JSON.stringify {
+      events
+      appType: 'active'
+    }
+
     res.render 'archive/archive', renderDict

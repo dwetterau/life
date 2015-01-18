@@ -20,12 +20,13 @@ LifeApp = React.createClass
     {events, headers, labels} = @processEvents(props.events)
     view_type = "day"
     base_moment = moment()
-    {objects, past_events, future_events} =
+    {objects, someFiltered} =
       @getAllTimelineObjects(
         events, headers, labels, @getViewTimeRange(view_type, base_moment), []
       )
 
     return {
+      appType: @props.appType
       events
       headers
       objects
@@ -33,8 +34,7 @@ LifeApp = React.createClass
       in_edit: false
       view_type
       base_moment
-      past_events
-      future_events
+      someFiltered
       labels
       labelFilter: []
     }
@@ -289,13 +289,11 @@ LifeApp = React.createClass
     # Reads the events and headers off of state, orders them, and returns them
     objects = []
     i = 0
-    past_events = false
-    future_events = false
+    someFiltered = false
     for header, j in headers
       if header.moment.unix() < view_time_range.start
         # Skip over all the events for this header that are out of the window
         while i < events.length and events[i].rendered_date == header.date
-          past_events = true
           i++
         continue
       if header.moment.unix() >= view_time_range.end
@@ -306,19 +304,10 @@ LifeApp = React.createClass
         i++
       # If the previous thing in objects is a header, the events have been filtered out
       if objects[objects.length - 1].header?
-        objects.push @getAllObjectsFilteredElement(header.key + '-all-filtered')
+        someFiltered = true
+        objects.pop()
 
-    if i < events.length
-      future_events = true
-
-    return {objects, past_events, future_events}
-
-  getAllObjectsFilteredElement: (key) ->
-    return {
-      element: React.createElement("div", {className: "text-center text-italic", key},
-        "You have filtered out all your events for this day."
-      )
-    }
+    return {objects, someFiltered}
 
   throwAlreadyEditingError: () ->
     $.snackbar
@@ -385,10 +374,12 @@ LifeApp = React.createClass
       start = moment(m.format(format), format).subtract(m.weekday(), 'day')
     else if view_type == 'month'
       start = moment(m.format("MM/1/YYYY"), format)
+    else if view_type == 'year'
+      start = moment(m.format("1/1/YYYY"), format)
     end = moment(start).add(1, view_type)
     return {start: start.unix(), end: end.unix()}
 
-  getNoObjectsHeader: () ->
+  getNoObjectsHeader: (prefix) ->
     time_range = @getViewTimeRange(@state.view_type)
     start_moment = moment.unix(time_range.start)
     if @state.view_type == 'day'
@@ -400,11 +391,14 @@ LifeApp = React.createClass
     else if @state.view_type == 'month'
       content = start_moment.format("MMMM, YYYY")
       subtext_ending = "month."
+    else if @state.view_type == 'year'
+      content = start_moment.format("YYYY")
+      subtext_ending = "year."
     return [
       React.createElement("div", {className: "header-tile", key: 'temp-header'},
         React.createElement("h4", {key: 'temp-header-content'}, content)
         React.createElement("i", {className: "text-center", key: 'temp-header-subtext'},
-          "You have not recorded any events for this " + subtext_ending
+          prefix + subtext_ending
         )
       )
     ]
@@ -426,10 +420,15 @@ LifeApp = React.createClass
         React.createElement("div", {key: "timeline-content"}, timeline_list)
       ]
     else
-      timeline = @getNoObjectsHeader()
-
-    if hasEvent
-      timeline.push React.createElement(TimelineBar, {key: "timeline-bar"})
+      # No events in the timeline, there are 3 cases. In archive,
+      # or some are filtered, or none are filtered
+      if @state.appType == 'archive'
+        timeline = @getNoObjectsHeader "You have no archived thoughts for this "
+      else if @state.appType == 'active'
+        if @state.someFiltered
+          timeline = @getNoObjectsHeader "You have filtered out all your thoughts for this "
+        else
+          timeline = @getNoObjectsHeader "You have not recorded any thoughts for this "
 
     app_nav_props = () =>
       key: "top_app_nav"
@@ -437,8 +436,6 @@ LifeApp = React.createClass
       switchView: @switchView
       changeTimeRange: @changeTimeRange
       addEvent: @addEvent
-      past_events: @state.past_events
-      future_events: @state.future_events
       labels: @state.labels
       filterTokens: @filterTokens
 
@@ -479,14 +476,8 @@ AppNavigation = React.createClass
   getNavigationButtons: () ->
     href = 'javascript:void(0)'
     className = "navigation-button btn btn-default"
-    disabled = {href, className: className + " disabled"}
-    past_options = disabled
-    future_options = disabled
-
-    if @props.past_events
-      past_options = {href, className, onClick: @goToPast}
-    if @props.future_events
-      future_options = {href, className, onClick: @goToFuture}
+    past_options = {href, className, onClick: @goToPast}
+    future_options = {href, className, onClick: @goToFuture}
 
     return [
       React.createElement("div", {key: 'past', className: "btn-group"},
@@ -522,6 +513,10 @@ AppNavigation = React.createClass
         React.createElement("li", null,
           React.createElement("a",
             {href, onClick: @switchView, 'data-view': 'month'}, 'One month')
+        )
+        React.createElement("li", null,
+          React.createElement("a",
+            {href, onClick: @switchView, 'data-view': 'year'}, 'One year')
         )
       )
     )
@@ -668,7 +663,6 @@ EventTile = React.createClass
         eventId: @state.event.id
 
       return React.createElement("div", {className: "well", id: @props.id},
-        React.createElement("div", {key: "arrow", className: "event-arrow"})
         React.createElement("div", {key: "date", className: "event-date"},
           @state.to_display.date,
           React.createElement(EventTileOptions, tileOptions)

@@ -11,7 +11,7 @@ life_app_div = document.getElementById 'life_app'
 if life_app_div
   # Copy in the initial state and render everything
   initial_state = JSON.parse(document.getElementById('initial_state').innerHTML)
-  React.render(React.createElement(LifeApp, {events: initial_state}),
+  React.render(React.createElement(LifeApp, initial_state),
     life_app_div)
 
 integration_menu_div = document.getElementById 'integration_menu'

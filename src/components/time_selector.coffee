@@ -1,12 +1,14 @@
 React = require 'react'
 moment = require 'moment'
 
+START_YEAR = 2020
+
 DaySelector = React.createClass
   displayName: "DaySelector"
   months: ['January', 'February', 'March', 'April', 'May', 'June', 'July',
                'August', 'September', 'October', 'November', 'December']
   days: [1..31]
-  years: (x for x in [1970..2014].reverse())
+  years: (x for x in [1970..START_YEAR].reverse())
   day_suffixes: ['st', 'nd', 'rd', 'th']
 
   getInitialState: (props) ->
@@ -54,7 +56,7 @@ DaySelector = React.createClass
     m = @state.date
     month = parseInt(m.format("MM")) - 1
     days = m.date() - 1
-    years = 2014 - m.year()
+    years = START_YEAR - m.year()
 
     return [month, days, years]
 
