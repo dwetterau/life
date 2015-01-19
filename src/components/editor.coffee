@@ -147,7 +147,7 @@ Editor = React.createClass
 
   componentDidMount: () ->
     $editor = $('#editor')
-    $editor.wysihtml5
+    $editor.wysihtml5 'deepExtend',
       toolbar:
         fa: false
         blockquote: false
@@ -158,6 +158,13 @@ Editor = React.createClass
         lists: @getListsTemplate()
         link: @getLinkTemplate()
         image: @getImageTemplate()
+      classes:
+        image: 1
+        'image-row': 1
+      tags:
+        img:
+          check_attributes:
+            src: "src"
 
     $editor.data("wysihtml5").editor.composer.setValue @state.detail
 
