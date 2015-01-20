@@ -33,12 +33,10 @@ Editor = React.createClass
     )
 
   getToolbarComponent: () ->
-    React.createElement("form", null,
-      React.createElement("div", {id: "toolbar", style: {display: 'none'}}
-        @getLinkElement {command: "bold", title: "ctrl+b", s: "mdi-editor-format-bold"}
-        @getLinkElement {command: "italic", title: "ctrl+i", s: "mdi-editor-format-italic"}
-        @getLinkElement {command: "underline", title: "ctrl+u", s: "mdi-editor-format-underline"}
-      )
+    React.createElement("div", {id: "toolbar", style: {display: 'none'}}
+      @getLinkElement {command: "bold", title: "ctrl+b", s: "mdi-editor-format-bold"}
+      @getLinkElement {command: "italic", title: "ctrl+i", s: "mdi-editor-format-italic"}
+      @getLinkElement {command: "underline", title: "ctrl+u", s: "mdi-editor-format-underline"}
     )
 
   render: () ->
