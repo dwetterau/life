@@ -20,6 +20,9 @@ Editor = React.createClass
       parserRules: wysihtml5ParserRules
       pasteParserRulesets: wysihtml5ParserPasteRulesets
 
+    editor.on "change", () =>
+      @setState detail: $editor.html()
+
   getLinkElement: (options) ->
     options['data-wysihtml5-command'] = options.command
     delete options.command
@@ -72,6 +75,7 @@ Editor = React.createClass
     React.createElement("div", id: "editor-container",
       @getToolbarComponent()
       React.createElement("div", {id: "editor", 'data-placeholder': "Enter text..."})
+      React.createElement("input", {id: "detail", type: "hidden", value: @state.detail})
     )
 
 module.exports = {Editor}
