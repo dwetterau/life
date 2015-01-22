@@ -131,11 +131,9 @@ listenForPhotos = (client, integration) ->
     if row.length
       imageRows.push row
 
-    hostname = config.get('hostname')
-
     # Render the image rows
     template = path_lib.join(__dirname, '../../views/image/image_detail.jade')
-    jade.renderFile template, {imageRows, hostname}, callback
+    jade.renderFile template, {imageRows}, callback
 
   createOrUpdateEvent = (callback) ->
     # Step 6
