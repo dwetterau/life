@@ -36,6 +36,9 @@ Editor = React.createClass
     delete options.commandValue
 
     options.className = "btn btn-default ed-btn small-btn"
+    React.createElement("a", options, options.t
+      React.createElement("span", className: mdiClass)
+    )
 
   getModal: (options) ->
     className = "well well-popup col-sm-4"
