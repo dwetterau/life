@@ -29,7 +29,7 @@ Editor = React.createClass
     mdiClass = "mdi-black " + options.s
     delete options.s
 
-    if options.commandValue is ""
+    if options.commandValue == ""
       options['data-wysihtml5-command-blank-value'] = "true"
     else
       options['data-wysihtml5-command-value'] = options.commandValue
