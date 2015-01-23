@@ -9,6 +9,7 @@ user_controller = require '../controllers/user_controller'
 integration_controller = require '../controllers/integration_controller'
 
 dropbox_controller = require '../controllers/dropbox_controller'
+google_calendar_controller = require '../controllers/google_calendar_controller'
 
 # GET home page
 router.get '/', index_controller.get_index
@@ -39,5 +40,11 @@ router.get '/integrations/dropbox', passport_config.isAuthenticated,
   dropbox_controller.get_connect_dropbox
 router.get '/integrations/dropbox/callback', passport_config.isAuthenticated,
   dropbox_controller.get_connect_dropbox_callback
+
+# Google calendar integration auth routes
+router.get '/integrations/gcal', passport_config.isAuthenticated,
+  google_calendar_controller.get_connect_gcal
+router.get '/integrations/gcal/callback', passport_config.isAuthenticated,
+  google_calendar_controller.get_connect_gcal_callback
 
 module.exports = router
