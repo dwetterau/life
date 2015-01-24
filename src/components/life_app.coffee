@@ -116,7 +116,7 @@ LifeApp = React.createClass
         new_state.in_edit = false
         new_state.temp_event = null
 
-        @setState new_state
+        @setState new_statetest
 
   cancelHandler: (e) ->
     # If the event was a temp event, just delete it
@@ -347,6 +347,15 @@ LifeApp = React.createClass
     new_state.base_moment = m
     @setState new_state
 
+  resetTimeRange: () ->
+    if @inlineEditing true
+      return
+    m = moment()
+    @state.base_moment = m
+    newState = @getAllTimelineObjects(@state.events, @state.headers, @state.labels)
+    newState.base_moment = m
+    @setState newState
+
   filterTokens: (filterTokens) ->
     if @inlineEditing(true)
       return
@@ -435,9 +444,11 @@ LifeApp = React.createClass
       top: true
       switchView: @switchView
       changeTimeRange: @changeTimeRange
+      resetTimeRange: @resetTimeRange
       addEvent: @addEvent
       labels: @state.labels
       filterTokens: @filterTokens
+      viewType: @state.view_type
 
     app_array = [React.createElement(AppNavigation, app_nav_props())]
     if @state.temp_event?
@@ -470,54 +481,60 @@ AppNavigation = React.createClass
   goToFuture: (e) ->
     @props.changeTimeRange false
 
+  goToToday: (e) ->
+    @props.resetTimeRange()
+
   componentDidMount: () ->
     @initializeFilterField()
 
   getNavigationButtons: () ->
     href = 'javascript:void(0)'
-    className = "navigation-button btn btn-default"
+    className = 'navigation-button btn btn-default'
+    textClassName = 'navigation-button text-navigation-button btn btn-default'
     past_options = {href, className, onClick: @goToPast}
     future_options = {href, className, onClick: @goToFuture}
+    today_options = {href, className: textClassName, onClick: @goToToday}
 
     return [
-      React.createElement("div", {key: 'past', className: "btn-group"},
+      React.createElement("div", {key: 'today', className: "btn-group"},
+        React.createElement("a", today_options,
+          React.createElement("span", null, "Today")
+        )
+      )
+      React.createElement("div", {key: 'past-future', className: "btn-group"},
         React.createElement("a", past_options,
           React.createElement("i", className: "mdi-navigation-chevron-left")
         )
-      )
-      React.createElement("div", {key: 'future', className: "btn-group"},
         React.createElement("a", future_options,
           React.createElement("i", className: "mdi-navigation-chevron-right")
         )
       )
     ]
 
-  getViewChangeButton: () ->
+  getViewChangeButtons: () ->
     href = 'javascript:void(0)'
+    c = (type) =>
+      r = 'navigation-button text-navigation-button btn btn-default'
+      if type == @props.viewType
+        r += ' disabled'
+      return r
+
     React.createElement("div", {key: "view-button", className: "btn-group"},
-      React.createElement("a", {
-        className: "btn btn-material-indigo dropdown-toggle small-btn"
-        'data-toggle': "dropdown"
-      }, "Time Range ",
-        React.createElement("span", {className: "caret"})
+      React.createElement("a",
+        {href, className: c('day'), onClick: @switchView, 'data-view': 'day'},
+        React.createElement("span", {'data-view': 'day'}, "Day")
       )
-      React.createElement("ul", className: "dropdown-menu small-menu",
-        React.createElement("li", null,
-          React.createElement("a",
-            {href, onClick: @switchView, 'data-view': 'day'}, 'One day')
-        )
-        React.createElement("li", null,
-          React.createElement("a",
-            {href, onClick: @switchView, 'data-view': 'week'}, 'One week')
-        )
-        React.createElement("li", null,
-          React.createElement("a",
-            {href, onClick: @switchView, 'data-view': 'month'}, 'One month')
-        )
-        React.createElement("li", null,
-          React.createElement("a",
-            {href, onClick: @switchView, 'data-view': 'year'}, 'One year')
-        )
+      React.createElement("a",
+        {href, className: c('week'), onClick: @switchView, 'data-view': 'week'},
+        React.createElement("span", {'data-view': 'week'}, "Week")
+      )
+      React.createElement("a",
+        {href, className: c('month'), onClick: @switchView, 'data-view': 'month'},
+        React.createElement("span", {'data-view': 'month'}, "Month")
+      )
+      React.createElement("a",
+        {href, className: c('year'), onClick: @switchView, 'data-view': 'year'},
+        React.createElement("span", {'data-view': 'year'}, "Year")
       )
     )
 
@@ -563,11 +580,11 @@ AppNavigation = React.createClass
   render: () ->
     navigation_buttons = @getNavigationButtons()
     filterField = @getLabelFilterField()
-    right_side = [navigation_buttons]
+    left_side = [@getAddEventButton(), navigation_buttons]
 
-    left_side = [@getAddEventButton()]
+    right_side = []
     if @props.top
-      left_side.push @getViewChangeButton()
+      right_side = [@getViewChangeButtons()]
 
     allButtons = []
     if @props.top

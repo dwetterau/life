@@ -89,6 +89,17 @@ div.event-header {
     padding: 0 5px;
 }
 
+.text-navigation-button {
+    line-height: 36px;
+    text-transform: none;
+    color: #333;
+    font-size: 11pt;
+}
+
+.text-navigation-button span {
+    color: #333;
+}
+
 .navigation-button i {
     color: #333;
     line-height: 36px;
@@ -110,13 +121,13 @@ input#labels-tokenfield {
 }
 
 div.nav-buttons-left-side {
-    width: 75%;
+    width: 50%;
     display: inline-block;
     text-align: left;
 }
 
 div.nav-buttons-right-side {
-    width: 25%;
+    width: 50%;
     display: inline-block;
     text-align: right;
 }
