@@ -116,7 +116,7 @@ LifeApp = React.createClass
         new_state.in_edit = false
         new_state.temp_event = null
 
-        @setState new_statetest
+        @setState new_state
 
   cancelHandler: (e) ->
     # If the event was a temp event, just delete it
