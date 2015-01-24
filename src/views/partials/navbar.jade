@@ -1,40 +1,35 @@
-.navbar.navbar-default.navbar-static-top.navbar-material-indigo
-  .container
-    .navbar-header
-      button.navbar-toggle(type="button", data-toggle="collapse", data-target=".navbar-responsive-collapse")
-        span.icon-bar
-        span.icon-bar
-        span.icon-bar
-      a.navbar-brand(href='/')
-        span
-        | Life
-    .collapse.navbar-collapse.navbar-responsive-collapse
-      ul.nav.navbar-nav
-        if user
-          li(class=title=='Thoughts'?'active':undefined)
-            a(href='/') Thoughts
-          li(class=title=='Archive'?'active':undefined)
-            a(href='/archive') Archive
-          li(class=title=='Integrations'?'active':undefined)
-            a(href='/integrations') Integrations
-        else
-          li(class=title=='Welcome'?'active':undefined)
-            a(href='/') Welcome
-      ul.nav.navbar-nav.navbar-right
-        if !user
-          li(class=title=='Login'?'active':undefined)
-            a(href='/user/login') Login
-          li(class=title=='Create Account'?'active':undefined)
-            a(href='/user/create') Create Account
-        else
-          li.dropdown
-            a.dropdown-toggle(href='#', data-toggle='dropdown')
-              | #{user.username}&nbsp;
-              i.caret
-            ul.dropdown-menu
-              li
-                a(href='/user/password')
-                  span Change Password
-              li
-                a(href='/user/logout')
-                  span Logout
+nav.side-menu.side-effect
+  h2 Life
+  ul.nav.navbar-nav
+    if !user
+      li(class=title=='Login'?'active':undefined)
+        a(href='/user/login') Login
+      li(class=title=='Create Account'?'active':undefined)
+        a(href='/user/create') Create Account
+    else
+      li.dropdown
+        a.dropdown-toggle(href='#', data-toggle='dropdown')
+          | #{user.username}&nbsp;
+          i.caret
+        ul.dropdown-menu
+          li
+            a(href='/user/password')
+              span Change Password
+          li
+            a(href='/user/logout')
+              span Logout
+  ul.nav.navbar-nav
+    li
+      if user
+        li(class=title=='Thoughts'?'active':undefined)
+          a(href='/') Thoughts
+        li(class=title=='Archive'?'active':undefined)
+          a(href='/archive') Archive
+        li(class=title=='Integrations'?'active':undefined)
+          a(href='/integrations') Integrations
+      else
+        li(class=title=='Welcome'?'active':undefined)
+          a(href='/') Welcome
+
+#menu-toggle-button
+  i.mdi-navigation-menu

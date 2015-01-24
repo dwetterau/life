@@ -19,3 +19,13 @@ if integration_menu_div
   # Copy in the initial state and render everything
   initial_state = JSON.parse(document.getElementById('initial_state').innerHTML)
   React.render(React.createElement(IntegrationMenu, initial_state), integration_menu_div)
+
+# Set up the navigation button
+$('#menu-toggle-button').click () ->
+  setTimeout () ->
+    $('.mega-container').addClass('side-menu-open')
+    $('.mega-container').click () ->
+      $('.mega-container').removeClass('side-menu-open')
+  , 25
+
+
