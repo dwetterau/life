@@ -24,8 +24,7 @@ if integration_menu_div
 $('#menu-toggle-button').click () ->
   setTimeout () ->
     $('.mega-container').addClass('side-menu-open')
-    $('.mega-container').click () ->
+    $('html').bind 'click', () ->
       $('.mega-container').removeClass('side-menu-open')
+      $('html').unbind('click')
   , 25
-
-

@@ -12,11 +12,11 @@ html
 
     meta(property="og:title" content=title)
 
-  body.mega-container.side-effect
-    include partials/navbar
-
-    .container.page-container
-      block content
+  body
+    .mega-container.side-effect
+      include partials/navbar
+      .container.page-container
+        block content
 
     include partials/footer
 
