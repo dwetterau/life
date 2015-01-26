@@ -31,3 +31,8 @@ toggleMenu = () ->
       $("#menu-toggle-button").bind 'click', toggleMenu
   , 25
 $("#menu-toggle-button").bind 'click', toggleMenu
+
+# Render user forms
+if $('#create_account').length
+  {CreateUser} = require '../../components/user/create_user'
+  React.render React.createElement(CreateUser, null), $('#create_account').get(0)

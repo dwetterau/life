@@ -360,3 +360,11 @@ div.nav-buttons-right-side {
         font-size: 30px;
     }
 }
+
+.white-paper {
+    background-color: #FFFFFF;
+}
+
+.form-container {
+    padding: 2em;
+}

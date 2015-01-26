@@ -24,4 +24,7 @@ echo "Compiling Coffeescript to JS..."
 echo "Linting..."
 find ./src -name "*.coffee" -print0 | xargs -0 ./node_modules/.bin/coffeelint -f ./coffeelint.json
 
+# Compile less files
+lessc ./bin/public/stylesheets/external/less/main.less > ./bin/public/stylesheets/less_main.css
+
 echo "Build successful!"
