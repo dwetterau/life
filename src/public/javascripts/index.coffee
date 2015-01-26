@@ -21,10 +21,13 @@ if integration_menu_div
   React.render(React.createElement(IntegrationMenu, initial_state), integration_menu_div)
 
 # Set up the navigation button
-$('#menu-toggle-button').click () ->
+toggleMenu = () ->
+  $("#menu-toggle-button").unbind 'click'
   setTimeout () ->
     $('.mega-container').addClass('side-menu-open')
     $('html').bind 'click', () ->
       $('.mega-container').removeClass('side-menu-open')
       $('html').unbind('click')
+      $("#menu-toggle-button").bind 'click', toggleMenu
   , 25
+$("#menu-toggle-button").bind 'click', toggleMenu

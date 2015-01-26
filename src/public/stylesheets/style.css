@@ -336,9 +336,27 @@ div.nav-buttons-right-side {
     display: none;
 }
 
+#menu-toggle-button {
+    margin-top: 15px;
+}
+
 #menu-toggle-button i {
-    position: fixed;
-    left: 20px;
-    top: 20px;
     font-size: 30px;
+    padding-left: 15px;
+    padding-right: 15px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+@media (min-width: 768px) {
+    #menu-toggle-button {
+        margin-top: 0;
+    }
+
+    #menu-toggle-button i {
+        position: fixed;
+        left: 15px;
+        top: 15px;
+        font-size: 30px;
+    }
 }
