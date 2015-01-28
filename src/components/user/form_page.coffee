@@ -26,8 +26,8 @@ FormPage = React.createClass
     React.createElement "div", {className: "container"},
       React.createElement "div", {className: "page-header"},
         React.createElement "h1", null, @props.pageHeader
-      React.createElement mui.Paper, null,
-        React.createElement "div", {className: "form-container col-offset-sm-3 col-sm-6"},
+      React.createElement mui.Paper, {className: "white-paper"},
+        React.createElement "div", {className: "form-container"},
           React.createElement "form",
             {className: "form-horizontal", action: @props.action, method: 'POST'},
             @getInputs(@props.inputs)

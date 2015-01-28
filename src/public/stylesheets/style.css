@@ -363,6 +363,8 @@ div.nav-buttons-right-side {
 
 .white-paper {
     background-color: #FFFFFF;
+    width: 50%;
+    margin-bottom: 10px;
 }
 
 .form-container {
