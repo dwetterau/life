@@ -38,7 +38,7 @@ exports.get_user_login = (req, res) ->
   redirect = req.param('r')
   res.render 'user/login', {
     title: 'Login'
-    redirect
+    props: JSON.stringify {redirect}
   }
 
 exports.post_user_login = (req, res, next) ->
