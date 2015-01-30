@@ -1,4 +1,5 @@
 React = require 'react'
+{Icon} = require 'material-ui'
 
 # Builds the necessary elements for the quill editor in React.js
 # This file was generated from an existing jade file, excuse the mess
@@ -26,7 +27,7 @@ Editor = React.createClass
   getLinkElement: (options) ->
     options['data-wysihtml5-command'] = options.command
     delete options.command
-    mdiClass = "mdi-black " + options.s
+    icon = options.s
     delete options.s
 
     if options.commandValue == ""
@@ -37,7 +38,7 @@ Editor = React.createClass
 
     options.className = "btn btn-default ed-btn small-btn"
     React.createElement("a", options, options.t
-      React.createElement("span", className: mdiClass)
+      if icon? then React.createElement(Icon, {icon}) else null
     )
 
   getModal: (options) ->
@@ -72,21 +73,21 @@ Editor = React.createClass
         @getLinkElement {command: "formatBlock", commandValue: "h1", t: "Large"}
         @getLinkElement {command: "formatBlock", commandValue: "h3", t: "Medium"}
         @getLinkElement {command: "formatBlock", commandValue: "p", t: "Normal"}
-        @getLinkElement {command: "formatBlock", commandValue: "", s: "mdi-editor-format-clear"}
+        @getLinkElement {command: "formatBlock", commandValue: "", s: "editor-format-clear"}
       )
       React.createElement("div", {className: "btn-group"},
-        @getLinkElement {command: "bold", title: "ctrl+b", s: "mdi-editor-format-bold"}
-        @getLinkElement {command: "italic", title: "ctrl+i", s: "mdi-editor-format-italic"}
-        @getLinkElement {command: "underline", title: "ctrl+u", s: "mdi-editor-format-underline"}
+        @getLinkElement {command: "bold", title: "ctrl+b", s: "editor-format-bold"}
+        @getLinkElement {command: "italic", title: "ctrl+i", s: "editor-format-italic"}
+        @getLinkElement {command: "underline", title: "ctrl+u", s: "editor-format-underline"}
       )
       React.createElement("div", {className: "btn-group"},
-        @getLinkElement {command: "insertUnorderedList", s: "mdi-editor-format-list-bulleted"}
-        @getLinkElement {command: "insertOrderedList", s: "mdi-editor-format-list-numbered"}
+        @getLinkElement {command: "insertUnorderedList", s: "editor-format-list-bulleted"}
+        @getLinkElement {command: "insertOrderedList", s: "editor-format-list-numbered"}
       )
       React.createElement("div", {className: "btn-group"},
-        @getLinkElement {command: "insertBlockQuote", s: "mdi-editor-format-quote"}
-        @getLinkElement {command: "createLink", s: "mdi-editor-insert-link"}
-        @getLinkElement {command: "insertImage", s: "mdi-editor-insert-photo"}
+        @getLinkElement {command: "insertBlockQuote", s: "editor-format-quote"}
+        @getLinkElement {command: "createLink", s: "editor-insert-link"}
+        @getLinkElement {command: "insertImage", s: "editor-insert-photo"}
       )
       @getModal {action: 'createLink', title: 'Link:', field: 'href'}
       @getModal {action: 'insertImage', title: 'Image:', field: 'src'}

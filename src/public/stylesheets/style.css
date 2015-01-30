@@ -69,12 +69,12 @@ div.event-header {
     display: inline-block;
 }
 
-.event-header i {
+.event-header .mui-icon {
     padding: 5px;
     border-radius: 16px;
 }
 
-.event-header i:hover {
+.event-header .mui-icon:hover {
     background-color: #eeeeee;
 }
 
@@ -100,7 +100,7 @@ div.event-header {
     color: #333;
 }
 
-.navigation-button i {
+.navigation-button .mui-icon {
     color: #333;
     line-height: 36px;
 }

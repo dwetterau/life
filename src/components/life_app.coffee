@@ -2,6 +2,7 @@ React = require 'react'
 moment = require 'moment'
 utils = require '../lib/utils'
 {EditEvent} = require './edit_event'
+{Icon} = require 'material-ui'
 
 # Structure:
 # LifeApp (which is the timeline)
@@ -503,10 +504,10 @@ AppNavigation = React.createClass
       )
       React.createElement("div", {key: 'past-future', className: "btn-group"},
         React.createElement("a", past_options,
-          React.createElement("i", className: "mdi-navigation-chevron-left")
+          React.createElement(Icon, {icon: "navigation-chevron-left"})
         )
         React.createElement("a", future_options,
-          React.createElement("i", className: "mdi-navigation-chevron-right")
+          React.createElement(Icon, {icon: "navigation-chevron-right"})
         )
       )
     ]
@@ -727,50 +728,44 @@ EventTileOptions = React.createClass
       throw Error "Can't edit non-active event"
     @props.handleBeginEdit e
 
-  getOptionsExpandClass: () ->
-    return "mdi-navigation-more-horiz"
-
-  getEventExpandClass: () ->
+  getEventExpandIcon: () ->
     if @props.eventShowAll
-      return "mdi-navigation-expand-less"
+      return "navigation-expand-less"
     else
-      return "mdi-navigation-expand-more"
+      return "navigation-expand-more"
 
   renderCollapsed: () ->
-    optionsClass = @getOptionsExpandClass()
-
     return React.createElement("div", className: "event-header",
-      React.createElement("i", {
-        className: optionsClass, onClick: @handleExpand
+      React.createElement(Icon, {
+        icon: "navigation-more-horiz", onClick: @handleExpand
       })
     )
 
   renderExpanded: (type) ->
-    eventExpandClass = @getEventExpandClass()
-    optionsClass = @getOptionsExpandClass()
+    eventExpandIcon = @getEventExpandIcon()
     if type == 'active'
       buttons = [
-        React.createElement("i", {
+        React.createElement(Icon, {
           key: "archive"
-          className: "mdi-content-archive", 'data-event_id': @props.eventId,
+          icon: "content-archive", 'data-event_id': @props.eventId,
           onClick: @handleArchive
         })
-        React.createElement("i", {
+        React.createElement(Icon, {
           key: "edit"
-          className: "mdi-content-create", 'data-event_id': @props.eventId,
+          icon: "content-create", 'data-event_id': @props.eventId,
           onClick: @handleBeginEdit
         })
       ]
     else if type == 'archived'
       buttons = [
-        React.createElement("i", {
+        React.createElement(Icon, {
           key: "restore"
-          className: "mdi-content-reply", 'data-event_id': @props.eventId,
+          icon: "content-reply", 'data-event_id': @props.eventId,
           onClick: @handleRestore
         })
-        React.createElement("i", {
+        React.createElement(Icon, {
           key: "delete"
-          className: "mdi-content-clear", 'data-event_id': @props.eventId,
+          icon: "content-clear", 'data-event_id': @props.eventId,
           onClick: @handleDelete
         })
       ]
@@ -778,9 +773,9 @@ EventTileOptions = React.createClass
       throw Error "Unknown event type"
 
     buttons = buttons.concat [
-      React.createElement("i",
-        {key: "ee", className: eventExpandClass, onClick: @handleEventExpand})
-      React.createElement("i", {key: "oe", className: optionsClass, onClick: @handleExpand})
+      React.createElement(Icon,
+        {key: "ee", icon: eventExpandIcon, onClick: @handleEventExpand})
+      React.createElement(Icon, {key: "oe", icon: "navigation-more-horiz", onClick: @handleExpand})
     ]
 
     return React.createElement("div", {key: "buttons", className: "event-header"}, buttons)
