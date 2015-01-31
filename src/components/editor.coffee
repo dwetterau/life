@@ -1,5 +1,5 @@
 React = require 'react'
-{Icon} = require 'material-ui'
+{Icon, FlatButton} = require 'material-ui'
 
 # Builds the necessary elements for the quill editor in React.js
 # This file was generated from an existing jade file, excuse the mess
@@ -36,10 +36,11 @@ Editor = React.createClass
       options['data-wysihtml5-command-value'] = options.commandValue
     delete options.commandValue
 
-    options.className = "btn btn-default ed-btn small-btn"
-    React.createElement("a", options, options.t
-      if icon? then React.createElement(Icon, {icon}) else null
-    )
+    options.label = if options.t? then options.t else React.createElement(Icon, {icon})
+    options.linkButton = true
+
+    options.className = "ed-btn small-btn"
+    React.createElement(FlatButton, options)
 
   getModal: (options) ->
     className = "well well-popup col-sm-4"
@@ -69,22 +70,22 @@ Editor = React.createClass
 
   getToolbarComponent: () ->
     React.createElement("div", {id: "toolbar", style: {display: 'none'}}
-      React.createElement("div", {className: "btn-group"},
+      React.createElement("div", {className: "inline-block"},
         @getLinkElement {command: "formatBlock", commandValue: "h1", t: "Large"}
         @getLinkElement {command: "formatBlock", commandValue: "h3", t: "Medium"}
         @getLinkElement {command: "formatBlock", commandValue: "p", t: "Normal"}
         @getLinkElement {command: "formatBlock", commandValue: "", s: "editor-format-clear"}
       )
-      React.createElement("div", {className: "btn-group"},
+      React.createElement("div", {className: "inline-block"},
         @getLinkElement {command: "bold", title: "ctrl+b", s: "editor-format-bold"}
         @getLinkElement {command: "italic", title: "ctrl+i", s: "editor-format-italic"}
         @getLinkElement {command: "underline", title: "ctrl+u", s: "editor-format-underline"}
       )
-      React.createElement("div", {className: "btn-group"},
+      React.createElement("div", {className: "inline-block"},
         @getLinkElement {command: "insertUnorderedList", s: "editor-format-list-bulleted"}
         @getLinkElement {command: "insertOrderedList", s: "editor-format-list-numbered"}
       )
-      React.createElement("div", {className: "btn-group"},
+      React.createElement("div", {className: "inline-block"},
         @getLinkElement {command: "insertBlockQuote", s: "editor-format-quote"}
         @getLinkElement {command: "createLink", s: "editor-insert-link"}
         @getLinkElement {command: "insertImage", s: "editor-insert-photo"}

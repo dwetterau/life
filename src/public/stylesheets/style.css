@@ -180,8 +180,13 @@ div.nav-buttons-right-side {
     font-style: italic;
 }
 
-.btn.btn-default.ed-btn {
+.ed-btn {
     color: #000;
+}
+
+.ed-btn.small-btn {
+    padding: 0 1em;
+    min-width: 0;
 }
 
 .btn.modal-submit-btn {
@@ -369,4 +374,13 @@ div.nav-buttons-right-side {
 
 .form-container {
     padding: 2em;
+}
+
+span.mui-icon {
+    font-size: 16px;
+    vertical-align: middle;
+}
+
+.inline-block {
+    display: inline-block;
 }
