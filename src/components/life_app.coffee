@@ -2,7 +2,7 @@ React = require 'react'
 moment = require 'moment'
 utils = require '../lib/utils'
 {EditEvent} = require './edit_event'
-{Icon} = require 'material-ui'
+{Icon, FlatButton} = require 'material-ui'
 
 # Structure:
 # LifeApp (which is the timeline)
@@ -474,7 +474,7 @@ AppNavigation = React.createClass
   displayName: 'AppNavigation'
 
   switchView: (e) ->
-    @props.switchView $(e.target).data('view')
+    @props.switchView $(e.target.parentElement).data('view')
 
   goToPast: (e) ->
     @props.changeTimeRange true
@@ -513,30 +513,21 @@ AppNavigation = React.createClass
     ]
 
   getViewChangeButtons: () ->
-    href = 'javascript:void(0)'
-    c = (type) =>
-      r = 'navigation-button text-navigation-button btn btn-default'
-      if type == @props.viewType
-        r += ' disabled'
-      return r
+    getButton = (type) =>
+      React.createElement FlatButton, {
+        className: 'navigation-button text-navigation-button'
+        onClick: @switchView
+        'data-view': type
+        label: type.charAt(0).toUpperCase() + type.substr(1).toLowerCase()
+        disabled: type == @props.viewType
+        linkButton: true
+      }
 
-    React.createElement("div", {key: "view-button", className: "btn-group"},
-      React.createElement("a",
-        {href, className: c('day'), onClick: @switchView, 'data-view': 'day'},
-        React.createElement("span", {'data-view': 'day'}, "Day")
-      )
-      React.createElement("a",
-        {href, className: c('week'), onClick: @switchView, 'data-view': 'week'},
-        React.createElement("span", {'data-view': 'week'}, "Week")
-      )
-      React.createElement("a",
-        {href, className: c('month'), onClick: @switchView, 'data-view': 'month'},
-        React.createElement("span", {'data-view': 'month'}, "Month")
-      )
-      React.createElement("a",
-        {href, className: c('year'), onClick: @switchView, 'data-view': 'year'},
-        React.createElement("span", {'data-view': 'year'}, "Year")
-      )
+    React.createElement("div", {key: "view-button"},
+      getButton("day")
+      getButton("week")
+      getButton("month")
+      getButton("year")
     )
 
   getAddEventButton: () ->
@@ -595,11 +586,13 @@ AppNavigation = React.createClass
         )
       )
     allButtons = allButtons.concat [
-      React.createElement("div", {key: "ls-buttons", className: "nav-buttons-left-side"}
-        left_side
-      )
-      React.createElement("div", {key: "rs-buttons", className: "nav-buttons-right-side"},
-        right_side
+      React.createElement("div", {key: "left-right-wrapper", className: "well well-sm"},
+        React.createElement("div", {key: "ls-buttons", className: "nav-buttons-left-side"}
+          left_side
+        )
+        React.createElement("div", {key: "rs-buttons", className: "nav-buttons-right-side"},
+          right_side
+        )
       )
     ]
 
