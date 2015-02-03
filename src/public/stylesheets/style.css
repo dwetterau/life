@@ -92,12 +92,7 @@ div.event-header {
 .text-navigation-button {
     line-height: 36px;
     text-transform: none;
-    color: #333;
     font-size: 11pt;
-}
-
-.text-navigation-button span {
-    color: #333;
 }
 
 .navigation-button .mui-icon {
@@ -162,6 +157,10 @@ div.nav-buttons-right-side {
 }
 
 .app-navigation {
+    margin-top: 10px;
+}
+
+.well.well-sm.controls-well {
     margin-top: 10px;
 }
 

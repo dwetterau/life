@@ -489,26 +489,22 @@ AppNavigation = React.createClass
     @initializeFilterField()
 
   getNavigationButtons: () ->
-    href = 'javascript:void(0)'
-    className = 'navigation-button btn btn-default'
-    textClassName = 'navigation-button text-navigation-button btn btn-default'
-    past_options = {href, className, onClick: @goToPast}
-    future_options = {href, className, onClick: @goToFuture}
-    today_options = {href, className: textClassName, onClick: @goToToday}
+    className = 'navigation-button text-navigation-button'
+    getButton = (label, onClick) ->
+      React.createElement(FlatButton, {
+        label
+        onClick
+        className
+        linkButton: true
+      })
 
     return [
-      React.createElement("div", {key: 'today', className: "btn-group"},
-        React.createElement("a", today_options,
-          React.createElement("span", null, "Today")
-        )
+      React.createElement("span", {key: 'today'},
+        getButton 'Today', @goToToday
       )
-      React.createElement("div", {key: 'past-future', className: "btn-group"},
-        React.createElement("a", past_options,
-          React.createElement(Icon, {icon: "navigation-chevron-left"})
-        )
-        React.createElement("a", future_options,
-          React.createElement(Icon, {icon: "navigation-chevron-right"})
-        )
+      React.createElement("span", {key: 'past-future'},
+        getButton React.createElement(Icon, {icon: "navigation-chevron-left"}), @goToPast
+        getButton React.createElement(Icon, {icon: "navigation-chevron-right"}), @goToFuture
       )
     ]
 
@@ -531,11 +527,14 @@ AppNavigation = React.createClass
     )
 
   getAddEventButton: () ->
-    href = 'javascript:void(0)'
-    React.createElement("div", {key: "add-event-button", className: "btn-group"},
-      React.createElement(
-        "a", {href, className: "btn btn-success small-btn", onClick: @props.addEvent}, 'Add Event')
-    )
+    React.createElement FlatButton, {
+      className: 'navigation-button text-navigation-button'
+      onClick: @props.addEvent
+      label: 'Add Event'
+      primary: true
+      linkButton: true
+      key: 'add-event-button'
+    }
 
   getNewFilterTokens: (e) ->
     @props.filterTokens $("#label-filter").tokenfield('getTokensList')
@@ -586,7 +585,8 @@ AppNavigation = React.createClass
         )
       )
     allButtons = allButtons.concat [
-      React.createElement("div", {key: "left-right-wrapper", className: "well well-sm"},
+      React.createElement("div",
+        {key: "left-right-wrapper", className: "well well-sm controls-well"},
         React.createElement("div", {key: "ls-buttons", className: "nav-buttons-left-side"}
           left_side
         )
