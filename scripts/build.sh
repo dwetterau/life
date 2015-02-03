@@ -15,9 +15,9 @@ cp -r ./src/integrations ./bin/integrations
 
 # Compile all coffeescript to js
 echo "Compiling Coffeescript to JS..."
-./node_modules/.bin/coffee --output ./bin/ --compile ./src/
+cjsx --output ./bin/ --compile ./src/
 
-./node_modules/.bin/browserify --extension .coffee --transform coffeeify --debug  \
+./node_modules/.bin/browserify -t coffee-reactify --extension=".cjsx" --extension=".coffee" --debug  \
 ./src/public/javascripts/index.coffee > ./bin/public/javascripts/bundle.js
 #./src/public/javascripts/index.coffee | uglifyjs > ./bin/public/javascripts/bundle.js
 

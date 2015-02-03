@@ -2,7 +2,7 @@ React = require 'react'
 
 # This dependency will be removed in react v1.0
 injectTapEventPlugin = require 'react-tap-event-plugin'
-mui = require 'material-ui'
+{Paper, RaisedButton, Input} = require 'material-ui'
 
 ###
   Expected props:
@@ -19,19 +19,22 @@ FormPage = React.createClass
   getInputs: (inputObjects) ->
     inputs = []
     for inputObject in inputObjects
-      inputs.push React.createElement mui.Input, inputObject
+      inputs.push React.createElement Input, inputObject
     return inputs
 
   render: () ->
-    React.createElement "div", {className: "container"},
-      React.createElement "div", {className: "page-header"},
-        React.createElement "h1", null, @props.pageHeader
-      React.createElement mui.Paper, {className: "white-paper"},
-        React.createElement "div", {className: "form-container"},
-          React.createElement "form",
-            {className: "form-horizontal", action: @props.action, method: 'POST'},
-            @getInputs(@props.inputs)
-            React.createElement mui.RaisedButton,
-              {type: "submit", label: @props.submitLabel, primary: true}
+    <div className="container">
+      <div className="page-header">
+        <h1>{@props.pageHeader}</h1>
+      </div>
+      <Paper className="white-paper">
+        <div className="form-container">
+          <form className="form-horizontal" action={@props.action} method="POST">
+            {@getInputs @props.inputs}
+            <RaisedButton type="submit" label={@props.submitLabel} primary=true />
+          </form>
+        </div>
+      </Paper>
+    </div>
 
 module.exports = {FormPage}
