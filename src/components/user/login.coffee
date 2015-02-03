@@ -12,13 +12,13 @@ Login = React.createClass
           type: "text"
           name: "username"
           key: "username"
-          placeholder: "Username"
+          floatingLabelText: "Username"
           autofocus: ""
         }, {
           type: "password"
           name: "password"
           key: "password"
-          placeholder: "Password"
+          floatingLabelText: "Password"
         }, {
           type: "hidden"
           name: "redirect"

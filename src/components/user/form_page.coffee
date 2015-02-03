@@ -2,7 +2,7 @@ React = require 'react'
 
 # This dependency will be removed in react v1.0
 injectTapEventPlugin = require 'react-tap-event-plugin'
-{Paper, RaisedButton, Input} = require 'material-ui'
+{Paper, RaisedButton, TextField} = require 'material-ui'
 
 ###
   Expected props:
@@ -19,7 +19,10 @@ FormPage = React.createClass
   getInputs: (inputObjects) ->
     inputs = []
     for inputObject in inputObjects
-      inputs.push React.createElement Input, inputObject
+      inputObject.className = "form-input"
+      inputObject.hintText = ""
+      # TODO: Fix the hidden input field from showing up
+      inputs.push React.createElement TextField, inputObject
     return inputs
 
   render: () ->

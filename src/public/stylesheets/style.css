@@ -383,3 +383,7 @@ span.mui-icon {
 .inline-block {
     display: inline-block;
 }
+
+.form-input {
+    display: block;
+}

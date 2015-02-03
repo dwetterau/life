@@ -12,18 +12,18 @@ ChangePassword = React.createClass
           type: "password"
           name: "old_password"
           key: "old_password"
-          placeholder: "Old Password"
-          autofocus: ""
+          floatingLabelText: "Old Password"
+          autofocus: true
         }, {
           type: "password"
           name: "new_password"
           key: "new_password"
-          placeholder: "New Password"
+          floatingLabelText: "New Password"
         }, {
           type: "password"
           name: "confirm_password"
           key: "confirm_password"
-          placeholder: "Confirm Password"
+          floatingLabelText: "Confirm Password"
         }
       ]
       submitLabel: 'Change password'

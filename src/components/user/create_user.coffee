@@ -12,18 +12,18 @@ CreateUser = React.createClass
           type: "text"
           name: "username"
           key: "username"
-          placeholder: "Username"
+          floatingLabelText: "Username"
           autofocus: ""
         }, {
           type: "password"
           name: "password"
           key: "password"
-          placeholder: "Password"
+          floatingLabelText: "Password"
         }, {
           type: "password"
           name: "confirm_password"
           key: "confirm_password"
-          placeholder: "Confirm Password"
+          floatingLabelText: "Confirm Password"
         }
       ]
       submitLabel: 'Create account'
