@@ -21,7 +21,10 @@ FormPage = React.createClass
     for inputObject in inputObjects
       inputObject.className = "form-input"
       inputObject.hintText = ""
-      # TODO: Fix the hidden input field from showing up
+      if inputObject.type == 'hidden'
+        inputs.push React.createElement "input", inputObject
+        continue
+
       inputs.push React.createElement TextField, inputObject
     return inputs
 
