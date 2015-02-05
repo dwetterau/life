@@ -5,7 +5,7 @@ Login = React.createClass
   displayName: 'Login'
   render: () ->
     React.createElement FormPage,
-      pageHeader: 'Create an account'
+      pageHeader: 'Sign in'
       action: '/user/login'
       inputs: [
         {
