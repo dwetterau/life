@@ -2,6 +2,7 @@ React = require 'react'
 moment = require 'moment'
 {Selector} = require './time_selector'
 {Editor} = require './editor'
+{Paper} = require 'material-ui'
 
 EditEvent = React.createClass
   displayName: 'EditEvent'
@@ -48,43 +49,31 @@ EditEvent = React.createClass
     @props.submit_handler @state.event, @state.action
 
   render: () ->
-    return React.createElement("div", {className: 'well'},
-      React.createElement("form", {
-        id: "event_form",
-      },
-        # Elements for the time and date selection
-        React.createElement("div", {className: "form-group form-group-material-indigo"},
-          React.createElement(Selector, {date: @state.event.date})
-        )
+    <Paper className="default-paper">
+      <div className="form-container">
+        <form id="event_form">
+          <div className="form-group">
+            <Selector  date={@state.event.date} />
+          </div>
+          <div className="form-group">
+            <Editor detail={@state.event.detail} />
+          </div>
+        </form>
 
-        # Elements for the detail editing
-        React.createElement("div", {className: "form-group form-group-material-indigo"},
-          React.createElement(Editor, {detail: @state.event.detail})
-        )
-      )
+        <div className="form-group">
+          <input type="text" name="labels" id="labels" placeholder="Enter labels..."
+            defaultValue={@convertToString(@state.event.labels)} />
+        </div>
 
-      # Elements for the labels
-      React.createElement("div", {className: "form-group"},
-        React.createElement("input", {
-          type: "text"
-          name: "labels"
-          id: "labels"
-          placeholder: "Enter labels..."
-          defaultValue: @convertToString(@state.event.labels)
-        })
-      )
-
-      # Elements for the submit button
-      React.createElement("div", {className: "form-group form-group-material-indigo text-right"},
-        React.createElement("button",
-          {className: "btn btn-danger submit-button", onClick: @props.cancel_handler},
-          React.createElement("span", null, "Cancel")
-        )
-        React.createElement("button",
-          {className: "btn btn-success submit-button", onClick: @handleSubmit},
-          React.createElement("span", null, "Done")
-        )
-      )
-    )
+        <div className="form-group button-row text-right">
+          <button className="btn btn-danger submit-button" onClick={@props.cancel_handler}>
+            <span>Cancel</span>
+          </button>
+          <button className="btn btn-success submit-button" onClick={@handleSubmit}>
+            <span>Done</span>
+          </button>
+        </div>
+      </div>
+    </Paper>
 
 module.exports = {EditEvent}

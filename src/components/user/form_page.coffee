@@ -33,7 +33,7 @@ FormPage = React.createClass
       <div className="page-header">
         <h1>{@props.pageHeader}</h1>
       </div>
-      <Paper className="white-paper">
+      <Paper className="default-paper form-paper">
         <div className="form-container">
           <form className="form-horizontal" action={@props.action} method="POST">
             {@getInputs @props.inputs}

@@ -1,13 +1,13 @@
 html {
     position: relative;
-    min-height: 100%;
+    background-color: #eeeeee;
 }
 
 body {
     padding-left: 0;
     padding-right: 0;
-    margin-bottom: 75px;
     overflow-x: hidden;
+    height: initial;
 }
 
 a {
@@ -15,7 +15,6 @@ a {
 }
 
 footer {
-    position: absolute;
     bottom: 0;
     width: 100%;
     line-height: 45px;
@@ -365,8 +364,11 @@ div.nav-buttons-right-side {
     }
 }
 
-.white-paper {
+.default-paper {
     background-color: #FFFFFF;
+}
+
+.form-paper {
     width: 50%;
     margin-left: 25%;
     margin-right: 25%;
@@ -388,4 +390,8 @@ span.mui-icon {
 
 .form-input {
     display: block;
+}
+
+.form-group.button-row {
+    margin-bottom: 0;
 }
