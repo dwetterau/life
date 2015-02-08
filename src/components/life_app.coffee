@@ -461,13 +461,6 @@ LifeApp = React.createClass
     app_array.push React.createElement("div",
       {key: "timeline", className: "col-sm-offset-2 col-sm-8"}, timeline)
 
-    # TODO: Mess with this random constant
-    if timeline_list.length > 3
-      props = app_nav_props()
-      props.key = "bottom_app_nav"
-      props.top = false
-      app_array.push React.createElement(AppNavigation, props)
-
     return React.createElement("div", null, app_array)
 
 AppNavigation = React.createClass
