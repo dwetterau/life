@@ -49,7 +49,7 @@ EditEvent = React.createClass
     @props.submit_handler @state.event, @state.action
 
   render: () ->
-    <Paper className="default-paper">
+    <Paper className="default-paper event-paper">
       <div className="form-container">
         <form id="event_form">
           <div className="form-group">

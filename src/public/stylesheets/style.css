@@ -382,6 +382,14 @@ div.nav-buttons-right-side {
     padding: 2em;
 }
 
+.event-paper {
+    margin-bottom: 10px;
+}
+
+.event-container {
+    padding: 2em;
+}
+
 span.mui-icon {
     font-size: 16px;
     vertical-align: middle;

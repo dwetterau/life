@@ -2,7 +2,7 @@ React = require 'react'
 moment = require 'moment'
 utils = require '../lib/utils'
 {EditEvent} = require './edit_event'
-{Icon, FlatButton} = require 'material-ui'
+{Icon, FlatButton, Paper} = require 'material-ui'
 
 # Structure:
 # LifeApp (which is the timeline)
@@ -666,16 +666,17 @@ EventTile = React.createClass
         type: @props.type
         eventId: @state.event.id
 
-      return React.createElement("div", {className: "well", id: @props.id},
-        React.createElement("div", {key: "date", className: "event-date"},
-          @state.to_display.date,
-          React.createElement(EventTileOptions, tileOptions)
-        )
-        React.createElement("div", {
-          className: "event-detail", key: "detail"
-          dangerouslySetInnerHTML: {__html: @state.to_display.detail}
-        })
-      )
+      <Paper className="default-paper event-paper">
+        <div className="event-container">
+          <div key="date" className="event-date">
+            {@state.to_display.date}
+            <EventTileOptions {...tileOptions}/>
+          </div>
+          <div className="event-detail" key="detail"
+            dangerouslySetInnerHTML={__html: @state.to_display.detail}>
+          </div>
+        </div>
+      </Paper>
 
 EventTileOptions = React.createClass
   displayName: "EventTileOptions"
