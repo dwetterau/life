@@ -722,59 +722,37 @@ EventTileOptions = React.createClass
       return "navigation-expand-more"
 
   renderCollapsed: () ->
-    return React.createElement("div", className: "event-header",
-      React.createElement(Icon, {
-        icon: "navigation-more-horiz", onClick: @handleExpand
-      })
-    )
+    <div className="event-header">
+      <Icon icon="navigation-more-horiz" onClick={@handleExpand} />
+    </div>
 
   renderExpanded: (type) ->
     eventExpandIcon = @getEventExpandIcon()
     if type == 'active'
       buttons = [
-        React.createElement(Icon, {
-          key: "archive"
-          icon: "content-archive", 'data-event_id': @props.eventId,
-          onClick: @handleArchive
-        })
-        React.createElement(Icon, {
-          key: "edit"
-          icon: "content-create", 'data-event_id': @props.eventId,
-          onClick: @handleBeginEdit
-        })
+        <Icon key="archive" icon="content-archive" data-event_id={@props.eventId} onClick={@handleArchive}/>
+        <Icon key="edit" icon="content-create" data-event_id={@props.eventId} onClick={@handleBeginEdit}/>
       ]
     else if type == 'archived'
       buttons = [
-        React.createElement(Icon, {
-          key: "restore"
-          icon: "content-reply", 'data-event_id': @props.eventId,
-          onClick: @handleRestore
-        })
-        React.createElement(Icon, {
-          key: "delete"
-          icon: "content-clear", 'data-event_id': @props.eventId,
-          onClick: @handleDelete
-        })
+        <Icon key="restore" icon="content-reply" data-event_id={@props.eventId} onClick={@handleRestore}/>
+        <Icon key="delete" icon="content-clear" data-event_id={@props.eventId} onClick={@handleDelete}/>
       ]
     else
       throw Error "Unknown event type"
 
     buttons = buttons.concat [
-      React.createElement(Icon,
-        {key: "ee", icon: eventExpandIcon, onClick: @handleEventExpand})
-      React.createElement(Icon, {key: "oe", icon: "navigation-more-horiz", onClick: @handleExpand})
+      <Icon key="ee" icon={eventExpandIcon} onClick={@handleEventExpand}/>
+      <Icon key="oe" icon="navigation-more-horiz" onClick={@handleExpand}/>
     ]
 
-    return React.createElement("div", {key: "buttons", className: "event-header"}, buttons)
+    <div key="buttons" className="event-header">
+      {buttons}
+    </div>
 
   render: () ->
     if not @state.optionsExpanded
       return @renderCollapsed()
     return @renderExpanded @props.type
-
-TimelineBar = React.createClass
-  displayName: 'TimelineBar'
-  render: () ->
-    return React.createElement("div", {id: "timeline-bar"})
 
 module.exports = {LifeApp}
