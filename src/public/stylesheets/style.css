@@ -371,6 +371,10 @@ div.nav-buttons-right-side {
     background-color: #FFFFFF;
 }
 
+.default-paper ul {
+    padding-left: 40px;
+}
+
 .form-paper {
     width: 50%;
     margin-left: 25%;
