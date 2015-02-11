@@ -85,13 +85,14 @@ div.event-header {
     height: 36px;
     font-size: 18pt;
     text-align: center;
-    padding: 0 5px;
+    min-width: 0;
 }
 
 .text-navigation-button {
     line-height: 36px;
     text-transform: none;
     font-size: 11pt;
+    padding: 0 .5em;
 }
 
 .navigation-button .mui-icon {
