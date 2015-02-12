@@ -1,8 +1,12 @@
 React = require 'react'
 moment = require 'moment'
 utils = require '../lib/utils'
-{EditEvent} = require './edit_event'
 {Icon, FlatButton, Paper} = require 'material-ui'
+
+{EditEvent} = require './edit_event'
+{LifeAppNavigation} = require './life_app_navigation'
+{EventTile} = require './tiles/event_tile'
+{HeaderTile} = require './tiles/header_tile'
 
 # Structure:
 # LifeApp (which is the timeline)
@@ -420,7 +424,7 @@ LifeApp = React.createClass
       if object.element?
         timeline_list.push object.element
       else if object.header?
-        timeline_list.push React.createElement(Header, object)
+        timeline_list.push React.createElement(HeaderTile, object)
       else if object.event?
         hasEvent = true
         timeline_list.push React.createElement(EventTile, object)
@@ -451,7 +455,7 @@ LifeApp = React.createClass
       filterTokens: @filterTokens
       viewType: @state.view_type
 
-    app_array = [React.createElement(AppNavigation, app_nav_props())]
+    app_array = [React.createElement(LifeAppNavigation, app_nav_props())]
     if @state.temp_event?
       app_array.push React.createElement(
         "div",
@@ -462,297 +466,5 @@ LifeApp = React.createClass
       {key: "timeline", className: "col-sm-offset-2 col-sm-8"}, timeline)
 
     return React.createElement("div", null, app_array)
-
-AppNavigation = React.createClass
-  displayName: 'AppNavigation'
-
-  switchView: (e) ->
-    @props.switchView $(e.target.parentElement).data('view')
-
-  goToPast: (e) ->
-    @props.changeTimeRange true
-
-  goToFuture: (e) ->
-    @props.changeTimeRange false
-
-  goToToday: (e) ->
-    @props.resetTimeRange()
-
-  componentDidMount: () ->
-    @initializeFilterField()
-
-  getNavigationButtons: () ->
-    className = 'navigation-button text-navigation-button'
-    getButton = (label, onClick) ->
-      React.createElement(FlatButton, {
-        label
-        onClick
-        className
-        linkButton: true
-      })
-
-    return [
-      React.createElement("span", {key: 'today'},
-        getButton 'Today', @goToToday
-      )
-      React.createElement("span", {key: 'past-future'},
-        getButton React.createElement(Icon, {icon: "navigation-chevron-left"}), @goToPast
-        getButton React.createElement(Icon, {icon: "navigation-chevron-right"}), @goToFuture
-      )
-    ]
-
-  getViewChangeButtons: () ->
-    getButton = (type) =>
-      React.createElement FlatButton, {
-        className: 'navigation-button text-navigation-button'
-        onClick: @switchView
-        'data-view': type
-        label: type.charAt(0).toUpperCase() + type.substr(1).toLowerCase()
-        disabled: type == @props.viewType
-        linkButton: true
-      }
-
-    React.createElement("div", {key: "view-button"},
-      getButton("day")
-      getButton("week")
-      getButton("month")
-      getButton("year")
-    )
-
-  getAddEventButton: () ->
-    React.createElement FlatButton, {
-      className: 'navigation-button text-navigation-button'
-      onClick: @props.addEvent
-      label: 'Add Event'
-      primary: true
-      linkButton: true
-      key: 'add-event-button'
-    }
-
-  getNewFilterTokens: (e) ->
-    @props.filterTokens $("#label-filter").tokenfield('getTokensList')
-
-  initializeFilterField: () ->
-    getLabelList = () =>
-      ({value: l} for l of @props.labels)
-
-    engine = new Bloodhound({
-      local: getLabelList()
-      datumTokenizer: (d) ->
-        return Bloodhound.tokenizers.whitespace(d.value)
-      queryTokenizer: Bloodhound.tokenizers.whitespace
-    })
-    engine.initialize()
-
-    $("#label-filter").tokenfield({
-      delay: 100
-      delimiter: " "
-      createTokensOnBlur: true
-      typeahead: [null, {source: engine.ttAdapter()}]
-    }).on('tokenfield:createtoken', (e) ->
-      e.attrs.value = e.attrs.value.toLowerCase()
-    ).on('tokenfield:createdtoken', @getNewFilterTokens
-    ).on('tokenfield:removedtoken', @getNewFilterTokens)
-
-  getLabelFilterField: () ->
-    React.createElement("div", {key: "label-filter"},
-      React.createElement("input", {
-        type: "text", id: "label-filter", placeholder: "Filter by labels..."
-      })
-    )
-
-  render: () ->
-    navigation_buttons = @getNavigationButtons()
-    filterField = @getLabelFilterField()
-    left_side = [@getAddEventButton(), navigation_buttons]
-
-    right_side = []
-    if @props.top
-      right_side = [@getViewChangeButtons()]
-
-    allButtons = []
-    if @props.top
-      allButtons.push(
-        React.createElement("div", {key: "ff-wrapper", className: "well well-sm filter-field-well"}
-          filterField
-        )
-      )
-    allButtons = allButtons.concat [
-      React.createElement("div",
-        {key: "left-right-wrapper", className: "well well-sm controls-well"},
-        React.createElement("div", {key: "ls-buttons", className: "nav-buttons-left-side"}
-          left_side
-        )
-        React.createElement("div", {key: "rs-buttons", className: "nav-buttons-right-side"},
-          right_side
-        )
-      )
-    ]
-
-    # View changes
-    return React.createElement("div", {className: "col-sm-offset-2 col-sm-8 app-navigation"},
-      allButtons
-    )
-
-Header = React.createClass
-  displayName: 'Header'
-  render: () ->
-    return React.createElement("div", {className: 'header-tile', id: @props.id},
-      React.createElement("h4", null, @props.header.date)
-    )
-
-EventTile = React.createClass
-  displayName: 'EventTile'
-
-  getInitialState: (props) ->
-    props = props || @props
-
-    initial = {
-      event: props.event
-      type: props.type
-      show_all_detail: true
-    }
-    initial.to_display = @prepareEvent(props.event, true)
-
-    return initial
-
-  getEventDetail: (event, show_all) ->
-    if show_all
-      return event.detail
-    else
-      element = $('<div>').html(event.detail)
-      first_child = element.children().get(0)
-      return if first_child? then first_child.innerHTML else ""
-
-  prepareEvent: (event, show_all) ->
-    return {
-      date: event.date.format('h:mm a')
-      detail: @getEventDetail(event, show_all)
-    }
-
-  switchDetail: () ->
-    show_all_detail = not @state.show_all_detail
-    to_display = @prepareEvent(@state.event, show_all_detail)
-
-    # Trigger the render
-    @setState {to_display, show_all_detail}
-
-  handleArchive: (e) ->
-    @props.archive_handler e
-
-  handleRestore: (e) ->
-    @props.restoreHandler e
-
-  handleDelete: (e) ->
-    @props.deleteHandler e
-
-  handleBeginEdit: (e) ->
-    @props.edit_handler e
-
-  render: () ->
-    if @state.event.edit_mode
-      return React.createElement(EditEvent, {
-        id: @props.id, event: @state.event, labels: @props.labels,
-        submit_handler: @props.submit_handler, cancel_handler: @props.cancel_handler
-      })
-    else
-      tileOptions =
-        handleEventExpand: @switchDetail
-        handleArchive: @handleArchive
-        handleRestore: @handleRestore
-        handleDelete: @handleDelete
-        handleBeginEdit: @handleBeginEdit
-        eventShowAll: @state.show_all_detail
-        type: @props.type
-        eventId: @state.event.id
-
-      <Paper className="default-paper event-paper">
-        <div className="event-container">
-          <div key="date" className="event-date">
-            {@state.to_display.date}
-            <EventTileOptions {...tileOptions}/>
-          </div>
-          <div className="event-detail" key="detail"
-            dangerouslySetInnerHTML={__html: @state.to_display.detail}>
-          </div>
-        </div>
-      </Paper>
-
-EventTileOptions = React.createClass
-  displayName: "EventTileOptions"
-
-  getInitialState: () ->
-    return {
-      optionsExpanded: false
-    }
-
-  handleExpand: (e) ->
-    @setState optionsExpanded: not @state.optionsExpanded
-    e.preventDefault()
-    e.stopPropagation()
-    return false
-
-  handleEventExpand: (e) ->
-    @props.handleEventExpand e
-
-  handleArchive: (e) ->
-    if @props.type != 'active'
-      throw Error "Can't archive non-active event"
-    @props.handleArchive e
-
-  handleRestore: (e) ->
-    if @props.type != 'archived'
-      throw Error "Can't restore non-archived event"
-    @props.handleRestore e
-
-  handleDelete: (e) ->
-    if @props.type != 'archived'
-      throw Error "Can't delete non-archived event"
-    @props.handleDelete e
-
-  handleBeginEdit: (e) ->
-    if @props.type != 'active'
-      throw Error "Can't edit non-active event"
-    @props.handleBeginEdit e
-
-  getEventExpandIcon: () ->
-    if @props.eventShowAll
-      return "navigation-expand-less"
-    else
-      return "navigation-expand-more"
-
-  renderCollapsed: () ->
-    <div className="event-header">
-      <Icon icon="navigation-more-horiz" onClick={@handleExpand} />
-    </div>
-
-  renderExpanded: (type) ->
-    eventExpandIcon = @getEventExpandIcon()
-    if type == 'active'
-      buttons = [
-        <Icon key="archive" icon="content-archive" data-event_id={@props.eventId} onClick={@handleArchive}/>
-        <Icon key="edit" icon="content-create" data-event_id={@props.eventId} onClick={@handleBeginEdit}/>
-      ]
-    else if type == 'archived'
-      buttons = [
-        <Icon key="restore" icon="content-reply" data-event_id={@props.eventId} onClick={@handleRestore}/>
-        <Icon key="delete" icon="content-clear" data-event_id={@props.eventId} onClick={@handleDelete}/>
-      ]
-    else
-      throw Error "Unknown event type"
-
-    buttons = buttons.concat [
-      <Icon key="ee" icon={eventExpandIcon} onClick={@handleEventExpand}/>
-      <Icon key="oe" icon="navigation-more-horiz" onClick={@handleExpand}/>
-    ]
-
-    <div key="buttons" className="event-header">
-      {buttons}
-    </div>
-
-  render: () ->
-    if not @state.optionsExpanded
-      return @renderCollapsed()
-    return @renderExpanded @props.type
 
 module.exports = {LifeApp}
