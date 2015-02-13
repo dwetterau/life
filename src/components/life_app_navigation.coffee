@@ -1,5 +1,5 @@
 React = require 'react'
-{Icon, FlatButton} = require 'material-ui'
+{FlatButton, Icon, Paper, TextField} = require 'material-ui'
 
 LifeAppNavigation = React.createClass
   displayName: 'LifeAppNavigation'
@@ -93,11 +93,7 @@ LifeAppNavigation = React.createClass
     ).on('tokenfield:removedtoken', @getNewFilterTokens)
 
   getLabelFilterField: () ->
-    React.createElement("div", {key: "label-filter"},
-      React.createElement("input", {
-        type: "text", id: "label-filter", placeholder: "Filter by labels..."
-      })
-    )
+    <input id="label-filter" hintText="Filter by labels..."/>
 
   render: () ->
     navigation_buttons = @getNavigationButtons()
@@ -111,25 +107,26 @@ LifeAppNavigation = React.createClass
     allButtons = []
     if @props.top
       allButtons.push(
-        React.createElement("div", {key: "ff-wrapper", className: "well well-sm filter-field-well"}
-          filterField
-        )
+        <Paper className="default-paper">
+          <div className="filter-field-wrapper">
+            {filterField}
+          </div>
+        </Paper>
       )
     allButtons = allButtons.concat [
-      React.createElement("div",
-        {key: "left-right-wrapper", className: "well well-sm controls-well"},
-        React.createElement("div", {key: "ls-buttons", className: "nav-buttons-left-side"}
-          left_side
-        )
-        React.createElement("div", {key: "rs-buttons", className: "nav-buttons-right-side"},
-          right_side
-        )
-      )
+      <div key="left-right-wrapper" className="well well-sm controls-well">
+        <div key="ls-buttons" className="nav-buttons-left-side">
+          {left_side}
+        </div>
+        <div key="rs-buttons" className="nav-buttons-right-side">
+          {right_side}
+        </div>
+      </div>
     ]
 
     # View changes
-    return React.createElement("div", {className: "col-sm-offset-2 col-sm-8 app-navigation"},
-      allButtons
-    )
+    <div className="col-sm-offset-2 col-sm-8 app-navigation">
+      {allButtons}
+    </div>
 
 module.exports = {LifeAppNavigation}
