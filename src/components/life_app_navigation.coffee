@@ -93,7 +93,9 @@ LifeAppNavigation = React.createClass
     ).on('tokenfield:removedtoken', @getNewFilterTokens)
 
   getLabelFilterField: () ->
-    <input id="label-filter" hintText="Filter by labels..."/>
+    <div className="filter-field-wrapper">
+      <input id="label-filter" placeholder="Filter by labels..." />
+    </div>
 
   render: () ->
     navigation_buttons = @getNavigationButtons()
@@ -108,9 +110,7 @@ LifeAppNavigation = React.createClass
     if @props.top
       allButtons.push(
         <Paper className="default-paper">
-          <div className="filter-field-wrapper">
-            {filterField}
-          </div>
+          {filterField}
         </Paper>
       )
     allButtons = allButtons.concat [

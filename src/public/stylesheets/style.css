@@ -165,7 +165,11 @@ div.nav-buttons-right-side {
 }
 
 .filter-field-wrapper {
-    padding: .5em 1em;
+    padding: 1em 1em .5em 1em;
+}
+
+.filter-field-wrapper .twitter-typeahead input {
+    font-size: 16px;
 }
 
 #label-filter {
