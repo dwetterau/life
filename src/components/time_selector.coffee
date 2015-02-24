@@ -1,5 +1,6 @@
 React = require 'react'
 moment = require 'moment'
+{DropDownMenu} = require 'material-ui'
 
 START_YEAR = 2020
 
@@ -19,12 +20,11 @@ DaySelector = React.createClass
       date_suffix: @getDaySuffixIndex(props.date.date())
     }
 
-  handleChange: (event) ->
+  handleChange: (event, selectedIndex, menuItem) ->
     id = event.target.id
     i = event.target.selectedIndex
     state = @state
     selections = @getSelectionWithDate()
-
     if id == 'months'
       # if we are changing to a month with fewer days,
       # we may need to adjust the day as well
@@ -59,7 +59,6 @@ DaySelector = React.createClass
     years = START_YEAR - m.year()
 
     return [month, days, years]
-
 
   render: () ->
     selections = @getSelectionWithDate()
@@ -98,6 +97,20 @@ DaySelector = React.createClass
         }, years)
       )
     )
+
+    ###
+    months = ({payload: month, text: month} for month in @months)
+    days = ({payload: day, text: day} for day, i in @days when i < days_in_month)
+    years = ({payload: year, text: year} for year, i in @years)
+
+    changeHandler = @handleChange
+
+    return <div className="time">
+      <DropDownMenu menuItems={months} data-id="months" onChange={changeHandler}/>
+      <DropDownMenu menuItems={days} data-id="days" onChange={changeHandler}/>
+      <DropDownMenu menuItems={years} data-id="years" onChange={changeHandler} />
+    </div>
+    ###
 
 TimeSelector = React.createClass
   displayName: "TimeSelector"

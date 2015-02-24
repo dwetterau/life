@@ -1,5 +1,5 @@
 React = require 'react'
-{FlatButton, Icon, Paper, TextField} = require 'material-ui'
+{FlatButton, FontIcon, Icon, Paper, TextField} = require 'material-ui'
 
 LifeAppNavigation = React.createClass
   displayName: 'LifeAppNavigation'
@@ -21,21 +21,17 @@ LifeAppNavigation = React.createClass
 
   getNavigationButtons: () ->
     className = 'navigation-button text-navigation-button'
-    getButton = (label, onClick) ->
-      React.createElement(FlatButton, {
-        label
-        onClick
-        className
-        linkButton: true
-      })
-
     return [
       React.createElement("span", {key: 'today'},
-        getButton 'Today', @goToToday
+        React.createElement(FlatButton, {label: 'Today', onClick: @goToToday, className, linkButton: true})
       )
       React.createElement("span", {key: 'past-future'},
-        getButton React.createElement(Icon, {icon: "navigation-chevron-left"}), @goToPast
-        getButton React.createElement(Icon, {icon: "navigation-chevron-right"}), @goToFuture
+        React.createElement(FlatButton, {onClick: @goToPast, className, linkButton: true},
+          React.createElement(FontIcon, {className: "navigation-chevron-left"})
+        )
+        React.createElement(FlatButton, {onClick: @goToFuture, className, linkButton: true},
+          React.createElement(FontIcon, {className: "navigation-chevron-right"})
+        )
       )
     ]
 
