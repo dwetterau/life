@@ -1,5 +1,5 @@
 React = require 'react'
-{Icon, FlatButton} = require 'material-ui'
+{Icon, FlatButton, FontIcon} = require 'material-ui'
 
 # Builds the necessary elements for the quill editor in React.js
 # This file was generated from an existing jade file, excuse the mess
@@ -36,11 +36,16 @@ Editor = React.createClass
       options['data-wysihtml5-command-value'] = options.commandValue
     delete options.commandValue
 
-    options.label = if options.t? then options.t else React.createElement(Icon, {icon})
     options.linkButton = true
-
     options.className = "ed-btn small-btn"
-    React.createElement(FlatButton, options)
+    if options.t?
+      options.label = options.t
+      return <FlatButton {...options}/>
+    else
+      options.label = ""
+      return <FlatButton {...options}>
+        <FontIcon className={icon} />
+      </FlatButton>
 
   getModal: (options) ->
     className = "well well-popup col-sm-4"
