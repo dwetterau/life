@@ -61,19 +61,17 @@ div.event-header {
     float: right;
     cursor: pointer;
     font-size: 14pt;
-    min-height: 20px;
-    min-width: 20px;
     position: absolute;
     right: 30px;
     display: inline-block;
 }
 
-.event-header .mui-icon {
-    padding: 5px;
-    border-radius: 16px;
+.event-header .mui-font-icon {
+    margin: 5px;
+    border-radius: 18px;
 }
 
-.event-header .mui-icon:hover {
+.event-header .mui-font-icon:hover {
     background-color: #eeeeee;
 }
 
@@ -185,8 +183,10 @@ div.nav-buttons-right-side {
 }
 
 .ed-btn.small-btn {
-    padding: 0 1em;
+    padding: 0 .75em;
     min-width: 0;
+    line-height: 36px;
+    height: 36px;
 }
 
 .btn.modal-submit-btn {
@@ -373,7 +373,7 @@ div.nav-buttons-right-side {
     background-color: #FFFFFF;
 }
 
-.default-paper ul {
+.default-paper ul,ol {
     padding-left: 40px;
 }
 

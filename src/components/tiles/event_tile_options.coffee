@@ -1,5 +1,5 @@
 React = require 'react'
-{Icon} = require 'material-ui'
+{FontIcon} = require 'material-ui'
 
 EventTileOptions = React.createClass
   displayName: "EventTileOptions"
@@ -40,33 +40,33 @@ EventTileOptions = React.createClass
 
   getEventExpandIcon: () ->
     if @props.eventShowAll
-      return "navigation-expand-less"
+      return "svg-ic_expand_less_24px icon-button"
     else
-      return "navigation-expand-more"
+      return "svg-ic_expand_more_24px icon-button"
 
   renderCollapsed: () ->
     <div className="event-header">
-      <Icon icon="navigation-more-horiz" onClick={@handleExpand} />
+      <FontIcon className="svg-ic_more_horiz_24px icon-button" onClick={@handleExpand} />
     </div>
 
   renderExpanded: (type) ->
     eventExpandIcon = @getEventExpandIcon()
     if type == 'active'
       buttons = [
-        <Icon key="archive" icon="content-archive" data-event_id={@props.eventId} onClick={@handleArchive}/>
-        <Icon key="edit" icon="content-create" data-event_id={@props.eventId} onClick={@handleBeginEdit}/>
+        <FontIcon key="archive" className="svg-ic_archive_24px icon-button" data-event_id={@props.eventId} onClick={@handleArchive}/>
+        <FontIcon key="edit" className="svg-ic_create_24px icon-button" data-event_id={@props.eventId} onClick={@handleBeginEdit}/>
       ]
     else if type == 'archived'
       buttons = [
-        <Icon key="restore" icon="content-reply" data-event_id={@props.eventId} onClick={@handleRestore}/>
-        <Icon key="delete" icon="content-clear" data-event_id={@props.eventId} onClick={@handleDelete}/>
+        <FontIcon key="restore" className="svg-ic_reply_24px icon-button" data-event_id={@props.eventId} onClick={@handleRestore}/>
+        <FontIcon key="delete" className="svg-ic_clear_24px icon-button" data-event_id={@props.eventId} onClick={@handleDelete}/>
       ]
     else
       throw Error "Unknown event type"
 
     buttons = buttons.concat [
-      <Icon key="ee" icon={eventExpandIcon} onClick={@handleEventExpand}/>
-      <Icon key="oe" icon="navigation-more-horiz" onClick={@handleExpand}/>
+      <FontIcon key="ee" className={eventExpandIcon} onClick={@handleEventExpand}/>
+      <FontIcon key="oe" className="svg-ic_more_horiz_24px icon-button" onClick={@handleExpand}/>
     ]
 
     <div key="buttons" className="event-header">

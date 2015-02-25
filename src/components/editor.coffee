@@ -44,7 +44,7 @@ Editor = React.createClass
     else
       options.label = ""
       return <FlatButton {...options}>
-        <FontIcon className={icon} />
+        <FontIcon className={"svg-ic_" + icon + "_24px icon-button"} />
       </FlatButton>
 
   getModal: (options) ->
@@ -79,21 +79,21 @@ Editor = React.createClass
         @getLinkElement {command: "formatBlock", commandValue: "h1", t: "Large"}
         @getLinkElement {command: "formatBlock", commandValue: "h3", t: "Medium"}
         @getLinkElement {command: "formatBlock", commandValue: "p", t: "Normal"}
-        @getLinkElement {command: "formatBlock", commandValue: "", s: "editor-format-clear"}
+        @getLinkElement {command: "formatBlock", commandValue: "", s: "format_clear"}
       )
       React.createElement("div", {className: "inline-block"},
-        @getLinkElement {command: "bold", title: "ctrl+b", s: "editor-format-bold"}
-        @getLinkElement {command: "italic", title: "ctrl+i", s: "editor-format-italic"}
-        @getLinkElement {command: "underline", title: "ctrl+u", s: "editor-format-underline"}
+        @getLinkElement {command: "bold", title: "ctrl+b", s: "format_bold"}
+        @getLinkElement {command: "italic", title: "ctrl+i", s: "format_italic"}
+        @getLinkElement {command: "underline", title: "ctrl+u", s: "format_underline"}
       )
       React.createElement("div", {className: "inline-block"},
-        @getLinkElement {command: "insertUnorderedList", s: "editor-format-list-bulleted"}
-        @getLinkElement {command: "insertOrderedList", s: "editor-format-list-numbered"}
+        @getLinkElement {command: "insertUnorderedList", s: "format_list_bulleted"}
+        @getLinkElement {command: "insertOrderedList", s: "format_list_numbered"}
       )
       React.createElement("div", {className: "inline-block"},
-        @getLinkElement {command: "insertBlockQuote", s: "editor-format-quote"}
-        @getLinkElement {command: "createLink", s: "editor-insert-link"}
-        @getLinkElement {command: "insertImage", s: "editor-insert-photo"}
+        @getLinkElement {command: "insertBlockQuote", s: "format_quote"}
+        @getLinkElement {command: "createLink", s: "insert_link"}
+        @getLinkElement {command: "insertImage", s: "insert_photo"}
       )
       @getModal {action: 'createLink', title: 'Link:', field: 'href'}
       @getModal {action: 'insertImage', title: 'Image:', field: 'src'}
