@@ -412,3 +412,10 @@ span.mui-icon {
 .form-group.button-row {
     margin-bottom: 0;
 }
+
+.icon-button {
+    width: 24px;
+    height: 24px;
+    margin-top: 6px;
+    margin-bottom: 6px;
+}

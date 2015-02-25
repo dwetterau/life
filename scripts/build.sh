@@ -13,6 +13,8 @@ cp -r ./src/tests ./bin/tests
 cp -r ./src/views ./bin/views
 cp -r ./src/integrations ./bin/integrations
 
+cp -r ./node_modules/material-design-icons/sprites/svg-sprite ./bin/public/stylesheets/external
+
 # Compile all coffeescript to js
 echo "Compiling Coffeescript to JS..."
 cjsx --output ./bin/ --compile ./src/

@@ -27,10 +27,10 @@ LifeAppNavigation = React.createClass
       )
       React.createElement("span", {key: 'past-future'},
         React.createElement(FlatButton, {onClick: @goToPast, className, linkButton: true},
-          React.createElement(FontIcon, {className: "navigation-chevron-left"})
+          React.createElement(FontIcon, {className: "svg-ic_chevron_left_24px icon-button"})
         )
         React.createElement(FlatButton, {onClick: @goToFuture, className, linkButton: true},
-          React.createElement(FontIcon, {className: "navigation-chevron-right"})
+          React.createElement(FontIcon, {className: "svg-ic_chevron_right_24px icon-button"})
         )
       )
     ]
