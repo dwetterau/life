@@ -21,11 +21,11 @@ DaySelector = React.createClass
     }
 
   handleChange: (event, selectedIndex, menuItem) ->
-    id = event.target.id
-    i = event.target.selectedIndex
+    type = menuItem.type
+    i = selectedIndex
     state = @state
     selections = @getSelectionWithDate()
-    if id == 'months'
+    if type == 'month'
       # if we are changing to a month with fewer days,
       # we may need to adjust the day as well
       state.date.set('month', @months[i])
@@ -33,10 +33,10 @@ DaySelector = React.createClass
         new_num_days = state.date.daysInMonth()
         if @days[selections[1]] > new_num_days
           state.date_suffix = @getDaySuffixIndex(new_num_days)
-    else if id == 'days'
+    else if type == 'day'
       state.date.set('date', @days[i])
       state.date_suffix = @getDaySuffixIndex(@days[i])
-    else if id == 'years'
+    else if type == 'year'
       state.date.set('year', @years[i])
       # Handle the case from switching from Feb. 29th to not a leap year
       if i != selections[2]
@@ -65,52 +65,16 @@ DaySelector = React.createClass
     day_suffix = @day_suffixes[@state.date_suffix]
     days_in_month = @state.date.daysInMonth()
 
-    months = (React.createElement("option", {key: i}, month) for month, i in @months)
-    days = (React.createElement(
-      "option", {key: i}, day) for day, i in @days when i < days_in_month)
-    years = (React.createElement("option", {key: i}, year) for year, i in @years)
-
-    return React.createElement("div", className: "time",
-      React.createElement("div", {className: 'selector'},
-        React.createElement("select", {
-          id: "months"
-          className: "form-control selector"
-          value: @months[selections[0]]
-          onChange: @handleChange
-        }, months)
-      )
-      React.createElement("div", {className: 'selector'},
-        React.createElement("select", {
-          id: "days"
-          className: "form-control selector"
-          value: @days[selections[1]]
-          onChange: @handleChange
-        }, days)
-      )
-      React.createElement("span", {className: 'time'}, day_suffix, ", ")
-      React.createElement("div", {className: 'selector'},
-        React.createElement("select", {
-          id: "years"
-          className: "form-control selector"
-          value: @years[selections[2]]
-          onChange: @handleChange
-        }, years)
-      )
-    )
-
-    ###
-    months = ({payload: month, text: month} for month in @months)
-    days = ({payload: day, text: day} for day, i in @days when i < days_in_month)
-    years = ({payload: year, text: year} for year, i in @years)
-
-    changeHandler = @handleChange
+    months = ({payload: month, text: month, type: "month"} for month in @months)
+    days = ({payload: day, text: day, type: "day"} for day, i in @days when i < days_in_month)
+    years = ({payload: year, text: year, type: "year"} for year, i in @years)
 
     return <div className="time">
-      <DropDownMenu menuItems={months} data-id="months" onChange={changeHandler}/>
-      <DropDownMenu menuItems={days} data-id="days" onChange={changeHandler}/>
-      <DropDownMenu menuItems={years} data-id="years" onChange={changeHandler} />
+      <DropDownMenu className="dropdown" menuItems={months} onChange={@handleChange} selectedIndex={selections[0]}/>
+      <DropDownMenu className="dropdown" menuItems={days} onChange={@handleChange} selectedIndex={selections[1]}/>
+      <span className="inter-menu-text">{day_suffix}</span>
+      <DropDownMenu className="dropdown" menuItems={years} onChange={@handleChange} selectedIndex={selections[2]}/>
     </div>
-    ###
 
 TimeSelector = React.createClass
   displayName: "TimeSelector"

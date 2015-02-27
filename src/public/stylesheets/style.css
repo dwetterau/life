@@ -419,3 +419,20 @@ span.mui-icon {
     margin-top: 6px;
     margin-bottom: 6px;
 }
+
+.dropdown .mui-paper {
+    height: 300px;
+    z-index: 3;
+}
+
+.dropdown .mui-menu .mui-paper-container.mui-z-depth-bottom {
+    overflow-x: hidden !important;
+    overflow-y: scroll !important;
+}
+
+span.inter-menu-text {
+    line-height: 56px;
+    vertical-align: top;
+    font-size: 11pt;
+}
+
