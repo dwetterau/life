@@ -234,9 +234,10 @@ listenForPhotos = (client, integration) ->
   longpollDelta = (cursor) ->
     pollingCallback = (error, pollResult) ->
       if error
-        # TODO: depending on the error, we might want to check again
-        console.log error
-        return
+        console.log JSON.stringify(error)
+        # TODO: Read the error and see if it's a server error. For now, let's assume we're right and wait a while before
+        # starting again.
+        setTimeout pollingCallback, constants.DROPBOX_ERROR_WAIT_TIME
 
       # Call pollForChanges again after the timeout
       properDelay = (callback) ->
