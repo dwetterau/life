@@ -1,7 +1,7 @@
 exports.get_index = (req, res) ->
   # TODO: Retrieve the right state for the user
 
-  req.user.getIntegrations().success (retrievedIntegrations) ->
+  req.user.getIntegrations().then (retrievedIntegrations) ->
     integrations = {}
     for i in retrievedIntegrations
       integrations[i.type] = i.toJSON()

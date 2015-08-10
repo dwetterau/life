@@ -1,7 +1,7 @@
 getEventsWithState = (targetState, user, callback) ->
   # Maps event_id to list of labels
   label_map = {}
-  user.getLabels().success (all_labels) ->
+  user.getLabels().then (all_labels) ->
     for label in all_labels
       id = label.EventId
       if id of label_map
@@ -9,7 +9,7 @@ getEventsWithState = (targetState, user, callback) ->
       else
         label_map[id] = [label.to_json()]
     return user.getEvents({where: {state: targetState}})
-  .success (events) ->
+  .then (events) ->
     for e in events
       e.decrypt()
     events = (e.to_json() for e in events)

@@ -164,7 +164,7 @@ listenForPhotos = (client, integration) ->
       makeNewEvent()
     else
       # Update an existing event
-      Event.find({where: {id: lastUpdatedEvent.id}, include: [Image]}).then (event) ->
+      Event.findOne({where: {id: lastUpdatedEvent.id}, include: [Image]}).then (event) ->
         if event.state != 'active'
           return makeNewEvent()
         if moment(event.updatedAt).isAfter(lastUpdatedEvent.time)

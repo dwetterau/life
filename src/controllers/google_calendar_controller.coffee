@@ -2,7 +2,7 @@ passport = require 'passport'
 {Integration} = require '../models'
 
 exports.get_connect_gcal = (req, res, next) ->
-  Integration.find({where: {UserId: req.user.id, type: 'gcal'}}).success (result) ->
+  Integration.findOne({where: {UserId: req.user.id, type: 'gcal'}}).then (result) ->
     if not result
       # We haven't done gcal integration, start it through passport
       passport.authenticate('google')(req, res, next)
@@ -11,7 +11,7 @@ exports.get_connect_gcal = (req, res, next) ->
       # TODO: verify that the token hasn't been revoked, this might
       # not happen on this call though
       res.redirect '/integrations'
-  .failure (err) ->
+  .catch (err) ->
     console.log "Error getting stuff from Google"
     console.log err
     req.flash "errors", {msg: "Failed to check your Google calendar integration."}
@@ -30,9 +30,9 @@ exports.get_connect_gcal_callback = (req, res, next) ->
       key
       uid
     }
-    Integration.build(new_integration).save().success () ->
+    Integration.build(new_integration).save().then () ->
       res.redirect '/integrations'
-    .failure () ->
+    .catch () ->
       req.flash "errors", {msg: "Failed to authenticate."}
       res.redirect '/integrations'
   )(req, res, next)

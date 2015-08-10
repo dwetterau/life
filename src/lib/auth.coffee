@@ -15,15 +15,15 @@ passport.serializeUser (user, done) ->
   done null, user.id
 
 passport.deserializeUser (id, done) ->
-  models.User.find(id).success (user) ->
+  models.User.findById(id).then (user) ->
     # Capitalize the username
     user.username = user.username.charAt(0).toUpperCase() + user.username.slice(1)
     done null, user
-  .failure (err) ->
+  .catch (err) ->
     done err
 
 passport.use new LocalStrategy {usernameField: 'username'}, (username, password, done) ->
-  models.User.find({where: {username}}).success (user) ->
+  models.User.findOne({where: {username}}).then (user) ->
     if not user
       return done null, false, {message: 'Invalid username or password.'}
     user.compare_password password, (err, is_match) ->

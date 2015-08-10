@@ -24,13 +24,13 @@ exports.post_user_create = (req, res) ->
       req.flash 'errors', {msg: "Unable to create account at this time"}
       return res.redirect '/user/create'
     else
-      new_user.save().success () ->
+      new_user.save().then () ->
         req.logIn new_user, (err) ->
           req.flash 'success', {msg: 'Your account has been created!'}
           if err?
             req.flash 'info', {msg: "Could not automatically log you in at this time."}
           res.redirect '/'
-      .failure () ->
+      .catch () ->
         req.flash 'errors', {msg: 'Username already in use!'}
         res.redirect '/user/create'
 
@@ -88,20 +88,20 @@ exports.post_change_password = (req, res) ->
     req.flash 'errors', {msg: 'Failed to update password.'}
     return res.redirect '/user/password'
 
-  models.User.find(req.user.id).success (user) ->
+  models.User.findById(req.user.id).then (user) ->
     user.compare_password old_password, (err, is_match) ->
       if not is_match or err
         req.flash 'errors', {msg: 'Current password incorrect.'}
-        return fail();
+        return fail()
 
       user.hash_and_set_password new_password, (err) ->
         if err?
           return fail()
-        user.save().success () ->
+        user.save().then () ->
           req.flash 'success', {msg: 'Password changed!'}
           res.redirect '/user/password'
-        .failure fail
-  .failure fail
+        .catch fail
+  .catch fail
 
 exports.get_change_password = (req, res) ->
   res.render 'user/change_password', {

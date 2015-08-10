@@ -1,7 +1,8 @@
 React = require 'react'
 moment = require 'moment'
 utils = require '../lib/utils'
-{Icon, FlatButton, Paper} = require 'material-ui'
+{Icon, FlatButton, Paper, Styles} = require 'material-ui'
+ThemeManager = Styles.ThemeManager()
 
 {EditEvent} = require './edit_event'
 {LifeAppNavigation} = require './life_app_navigation'
@@ -44,6 +45,12 @@ LifeApp = React.createClass
       labelFilter: []
     }
 
+  childContextTypes:
+    muiTheme: React.PropTypes.object
+
+  getChildContext: ->
+    muiTheme: ThemeManager.getCurrentTheme()
+
   componentWillReceiveProps: (new_props, old_props) ->
     @setState @getInitialState(new_props)
 
@@ -55,7 +62,7 @@ LifeApp = React.createClass
     # Scroll to the edit pane
     $('html, body').animate({
       scrollTop: Math.max(0, $("form#event_form").offset().top - 120)
-    }, 1000);
+    }, 1000)
 
   getNewObjects: (events) ->
     {events, headers, labels} = @processEvents events

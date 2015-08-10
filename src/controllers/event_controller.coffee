@@ -45,13 +45,13 @@ exports.post_event_add = (req, res) ->
   }
   labels = req.body.labels
   new_event.encrypt()
-  new_event.save().success () ->
+  new_event.save().then () ->
     # Create label objects for all of the labels
     return Label.bulkCreate get_new_labels(labels, req.user.id, new_event.id)
-  .success (new_labels) ->
+  .then (new_labels) ->
     new_event.decrypt()
     res.send {status: 'ok', new_event: to_json_with_labels(new_event, new_labels)}
-  .failure fail
+  .catch fail
 
 
 exports.post_event_update = (req, res)  ->
@@ -65,7 +65,7 @@ exports.post_event_update = (req, res)  ->
 
   updated_event = null
   labels=  req.body.labels
-  Event.find(req.body.id).success (event) ->
+  Event.findById(req.body.id).then (event) ->
     if event.UserId != req.user.id
       return fail(msg: "You are not authorized to edit that event.")
 
@@ -74,15 +74,15 @@ exports.post_event_update = (req, res)  ->
     event.encrypt()
     updated_event = event
     return event.save()
-  .success () ->
+  .then () ->
     # Kill all the old labels
     return Label.destroy {where: {EventId: updated_event.id}}
-  .success () ->
+  .then () ->
     return Label.bulkCreate get_new_labels(labels, req.user.id, updated_event.id)
-  .success (new_labels) ->
+  .then (new_labels) ->
     updated_event.decrypt()
     res.send {status: 'ok', new_event: to_json_with_labels(updated_event, new_labels)}
-  .failure fail
+  .catch fail
 
 event_modification_endpoint = (new_state, req, res) ->
   req.assert('id', 'Must provide an event id.').isInt()
@@ -92,14 +92,14 @@ event_modification_endpoint = (new_state, req, res) ->
   if validation_errors
     return fail validation_errors
 
-  Event.find(req.body.id).success (event) ->
+  Event.findById(req.body.id).then (event) ->
     if event.UserId != req.user.id
       return fail(msg: "You are not authorized to edit that event.")
     event.state = new_state
     return event.save()
-  .success () ->
+  .then () ->
     res.send {status: 'ok'}
-  .failure fail
+  .catch fail
 
 exports.post_event_archive = (req, res) ->
   event_modification_endpoint 'archived', req, res
